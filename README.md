@@ -1,2 +1,2 @@
 # chat-app
-salutt
+salutt dubla 2
