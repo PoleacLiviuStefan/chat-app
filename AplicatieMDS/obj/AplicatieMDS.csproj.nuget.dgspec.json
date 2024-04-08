@@ -1,17 +1,17 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\Alex\\Documents\\GitHub\\chat-app\\AplicatieMDS\\AplicatieMDS.csproj": {}
+    "C:\\Users\\Alex\\Desktop\\MDS Proiect\\AplicatieMDS\\AplicatieMDS\\AplicatieMDS.csproj": {}
   },
   "projects": {
-    "C:\\Users\\Alex\\Documents\\GitHub\\chat-app\\AplicatieMDS\\AplicatieMDS.csproj": {
+    "C:\\Users\\Alex\\Desktop\\MDS Proiect\\AplicatieMDS\\AplicatieMDS\\AplicatieMDS.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\Alex\\Documents\\GitHub\\chat-app\\AplicatieMDS\\AplicatieMDS.csproj",
+        "projectUniqueName": "C:\\Users\\Alex\\Desktop\\MDS Proiect\\AplicatieMDS\\AplicatieMDS\\AplicatieMDS.csproj",
         "projectName": "AplicatieMDS",
-        "projectPath": "C:\\Users\\Alex\\Documents\\GitHub\\chat-app\\AplicatieMDS\\AplicatieMDS.csproj",
+        "projectPath": "C:\\Users\\Alex\\Desktop\\MDS Proiect\\AplicatieMDS\\AplicatieMDS\\AplicatieMDS.csproj",
         "packagesPath": "C:\\Users\\Alex\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\Alex\\Documents\\GitHub\\chat-app\\AplicatieMDS\\obj\\",
+        "outputPath": "C:\\Users\\Alex\\Desktop\\MDS Proiect\\AplicatieMDS\\AplicatieMDS\\obj\\",
         "projectStyle": "PackageReference",
         "configFilePaths": [
           "C:\\Users\\Alex\\AppData\\Roaming\\NuGet\\NuGet.Config",

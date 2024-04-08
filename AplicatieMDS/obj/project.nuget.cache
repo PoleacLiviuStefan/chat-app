@@ -1,8 +1,8 @@
 {
   "version": 2,
-  "dgSpecHash": "13ghYXVluRVGfzdRErkQ91beV/zzlXBpMziG2lc15iGPxgMUbrgQrDaaRtKbZ4NWbT+TzSIbnSWMEZ0Esr3aUw==",
+  "dgSpecHash": "/Luo+vEZNuk92O07aOSgxyaDdsBkOOJE5kf8Udm7kvtQLH2vL1Nip5L4cPJo0qKxJEH/z3euQh04JrGqduf+EQ==",
   "success": true,
-  "projectFilePath": "C:\\Users\\Alex\\Documents\\GitHub\\chat-app\\AplicatieMDS\\AplicatieMDS.csproj",
+  "projectFilePath": "C:\\Users\\Alex\\Desktop\\MDS Proiect\\AplicatieMDS\\AplicatieMDS\\AplicatieMDS.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\Alex\\.nuget\\packages\\humanizer.core\\2.8.26\\humanizer.core.2.8.26.nupkg.sha512",
     "C:\\Users\\Alex\\.nuget\\packages\\microsoft.aspnetcore.cryptography.internal\\6.0.25\\microsoft.aspnetcore.cryptography.internal.6.0.25.nupkg.sha512",
