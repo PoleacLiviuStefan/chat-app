@@ -1,0 +1,117 @@
+﻿@{
+    ViewBag.Name = "Index";
+}
+<br />
+
+<h2 class="text-center">Afisare chaturi</h2>
+
+<br />
+
+@if (TempData["message"] != null)
+{
+    <div class="alert @ViewBag.Alert p-3 rounded-3 text-center mb-5">
+        @ViewBag.Message
+    </div>
+}
+
+<br />
+
+@functions {
+    // Funcția pentru a verifica dacă utilizatorul este membru al canalului
+    int UserIsMember(int chatId)
+    {
+        if (ViewBag.EsteAdmin || ViewBag.EsteModerator)
+        {
+            return 1;
+        }
+
+        if (ViewBag.ChannelAccess.ContainsKey(chatId))
+        {
+            var acceptedUserList = ViewBag.ChannelAccess[chatId];
+            foreach (var user in acceptedUserList)
+            {
+                if (user == ViewBag.UserCurent)
+                    return 1;
+            }
+        }
+
+        if (ViewBag.ChannelPendingAccess.ContainsKey(chatId))
+        {
+            var pendingUserList = ViewBag.ChannelPendingAccess[chatId];
+            foreach (var user in pendingUserList)
+            {
+                if (user == ViewBag.UserCurent)
+                    return -1;
+            }
+        }
+
+        return 0;
+    }
+}
+
+@foreach (AplicatieMDS.Models.Chat chat in ViewBag.Chats)
+{
+    <div class="card">
+        @Html.Partial("ChatInfo", chat)
+
+        @if (UserIsMember(chat.Id) == 1)
+        {
+            <a class="btn btn-success" href="/Channels/Show/@chat.Id">Afisare chat</a>
+        }
+        else if (UserIsMember(chat.Id) == 0)
+        {
+            <form method="post" action="/Channels/Join/@chat.Id">
+                <button class="btn btn-info full-width-button" type="submit">Inscriere Chat</button>
+            </form>
+        }
+        else
+        {
+            <form method="post" action="/Chats/CancelJoin/@chat.Id">
+                <button class="btn btn-warning full-width-button" type="submit">Anulare inscriere</button>
+            </form>
+        }
+    </div>
+
+    <br />
+    <br />
+}
+
+@* Afisarea paginata a chat-urilor *@
+@{
+    string searchTerm = Context.Request.Query["searchTerm"]; // Obține searchTerm din ViewData
+}
+
+<div>
+    <nav aria-label="Page navigation example">
+        <ul class="pagination">
+            <li class="page-item">
+                <a class="page-link"
+                   href="/Channels/Index?page=1@(string.IsNullOrEmpty(searchTerm) ? "" : "&searchTerm=" + searchTerm)" aria-label="Previous">
+                    <span aria-hidden="true">&laquo;</span>
+                </a>
+            </li>
+            @for (int i = 1; i <= ViewBag.lastPage; i++)
+            {
+                <li class="page-item">
+                    <a class="page-link"
+                       href="/Channels/Index?page=@i@(string.IsNullOrEmpty(searchTerm) ? "" : "&searchTerm=" + searchTerm)">
+                        @(i)
+                    </a>
+                </li>
+            }
+            <li class="page-item">
+                <a class="page-link"
+                   href="/Channels/Index?page=@(ViewBag.lastPage)@(string.IsNullOrEmpty(searchTerm) ? "" : "&searchTerm=" + searchTerm)"
+                   aria-label="Next">
+                    <span aria-hidden="true">&raquo;</span>
+                </a>
+            </li>
+        </ul>
+    </nav>
+</div>
+
+
+
+
+
+

@@ -1,0 +1,213 @@
+﻿@model AplicatieMDS.Models.Chat
+
+
+@* Afisarea unui chat*@
+
+@if (TempData["message"] != null)
+{
+    <div class="alert @ViewBag.Alert p-3 rounded-3 text-center mb-5">
+        @ViewBag.Message
+    </div>
+}
+
+<br />
+
+<div class="row">
+    <div class="card col-sm-9">
+
+        @Html.Partial("ChatInfo", Model)
+
+        @if (Model.UserId == ViewBag.UserCurent || ViewBag.EsteModerator || ViewBag.EsteAdmin)
+        {
+            <div class="d-flex flex-row justify-content-between p-3 border-1 border-top">
+
+                <a class="btn btn-success" href="/Chats/Edit/@Model.Id">Editeaza chat</a>
+
+                <form method="post" action="/Chats/Delete/@Model.Id">
+
+                    <button class="btn btn-danger" type="submit">Sterge chat</button>
+
+                </form>
+
+            </div>
+        }
+
+
+        <br />
+        <br />
+
+        @* Afisare mesaje impreuna cu butoanele de editare si stergere *@
+
+        @foreach (var mess in Model.Messages)
+        {
+            <div class="container">
+                <div class="row">
+                    <div class="col-md-2"></div>
+
+                    <div class="col-md-8">
+
+                        <div>
+
+                            <strong><i class="bi bi-person"></i>@mess.User.UserName</strong>
+                            <small>@mess.Date</small>
+
+                            <p>
+                                @using System.Text.RegularExpressions
+                                @{
+                                    var content = mess.Content;
+                                }
+
+                                @if (content.Contains(".jpeg") || content.Contains(".jpg") || content.Contains(".gif") || content.Contains(".png") || content.Contains(".JPG"))
+                                {
+                                    <img src="@content" alt="Imagine încorporată" class="img-fluid">
+                                }
+                                else if (content.Contains("youtube.com") || content.Contains("youtu.be"))
+                                {
+                                    var videoId = Regex.Match(content, @"(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})").Groups[1].Value;
+                                    <iframe width='560' height='315' src='https://www.youtube.com/embed/@videoId' frameborder='0' allowfullscreen></iframe>
+                                }
+                                else
+                                {
+                                    @Html.Raw(content)
+                                }
+
+                            </p>
+
+
+
+
+                        </div>
+
+
+
+                        @if (mess.UserId == ViewBag.UserCurent || ViewBag.EsteModerator || ViewBag.EsteAdmin || Model.UserId == ViewBag.UserCurent)
+                        {
+
+                            <div class="d-flex">
+
+                                <div>
+
+                                    <a class="btn btn-outline-primary" href="@Url.Action("Edit", "Messages", new { id = mess.Id, chatId = Model.Id })"><i class="bi bi-pencil-square"></i>Editeaza</a>
+
+                                </div>
+
+                                <div>
+
+                                    <form method="post" action="/Messages/Delete/@mess.Id">
+
+                                        <button class="btn btn-outline-danger" type="submit"><i class="bi bi-trash"></i>Sterge</button>
+
+                                    </form>
+
+                                </div>
+
+                            </div>
+                        }
+
+                        <br />
+
+                    </div>
+
+                    <div class="col-md-2"></div>
+
+                </div>
+
+            </div>
+        }
+
+
+        @* Afisarea formularului in care se poate adauga un mesaj *@
+
+        <div class="container">
+
+            <div class="row">
+
+                <div class="col-md-2"></div>
+
+                <div class="col-md-8">
+
+                    <div class="card">
+
+                        <form method="post" action="/Chats/Show/@Model.Id">
+
+                            <div class="card-body">
+
+                                <input type="hidden" name="ChatId" value="@Model.Id" />
+
+                                <label>Continut mesaj</label>
+                                <br />
+
+                                <textarea class="form-control" name="Content"></textarea>
+
+                                @Html.ValidationMessage("Content", null, new { @class = "text-danger"})
+
+                                <br /><br />
+
+                                <button class="btn btn-success " type="submit">Adauga mesaj</button>
+
+                            </div>
+
+                        </form>
+
+                    </div>
+
+                    <br /><br />
+
+                </div>
+
+                <div class="col-md-2"></div>
+
+
+            </div>
+
+
+
+        </div>
+
+
+
+    </div>
+
+    <div class="card col-sm-3 padding-left-10">
+        Useri:
+
+        @foreach (var user in ViewBag.UserStatus)
+        {
+            <div class="accept-reject">
+                @if (user.Value == "1")
+                {
+                    <a>✔️ @user.Key </a>
+                }
+                else if (Model.UserId == ViewBag.UserCurent || ViewBag.EsteAdmin)
+                {
+                    <a>❓ @user.Key  </a>
+
+                    <form method="post" action="/Chats/Accept/@user.Key-@Model.Id">
+                        <button class="btn small-btn" type="submit">✔️</button>
+                    </form>
+
+                    <form method="post" action="/Chats/Reject/@user.Key-@Model.Id">
+                        <button class="btn small-btn" type="submit">❌</button>
+                    </form>
+                }
+
+                @if (user.Value == "1" && user.Key != ViewBag.UserNameCurent && (ViewBag.EsteAdmin || ViewBag.EsteModerator || Model.UserId == ViewBag.UserCurent))
+                {
+
+                    <form method="post" action="/Chats/Leave/@user.Key-@Model.Id">
+                        <button class="btn small-btn" type="submit">👋🏻</button>
+                    </form>
+                }
+
+                @if (user.Value == "1" && user.Key == ViewBag.UserNameCurent && Model.UserId != ViewBag.UserCurent)
+                {
+                    <form method="post" action="/Chats/Exit/@user.Key-@Model.Id">
+                        <button class="btn small-btn" type="submit">👋🏻</button>
+                    </form>
+
+                }
+            </div>
+        }
+
+
+    </div>

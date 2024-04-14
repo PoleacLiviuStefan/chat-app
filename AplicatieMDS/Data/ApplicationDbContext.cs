@@ -31,7 +31,11 @@ namespace AplicatieMDS.Data
 
             builder.Entity<ChatUser>()
                 .HasOne(cu => cu.User)
+<<<<<<< Updated upstream
                 .WithMany(u => u.ChannelUsers)
+=======
+                .WithMany(u => u.ChatUsers)
+>>>>>>> Stashed changes
                 .HasForeignKey(cu => cu.UserId);
         }
 
