@@ -2,8 +2,16 @@
 
 namespace AplicatieMDS.Models
 {
+   
     public class Message
     {
+        public enum MessageStatus
+        {
+            Delivered,
+            Unseen,
+            Seen
+        }
+
         [Key]
         public int Id { get; set; }
 
@@ -11,6 +19,8 @@ namespace AplicatieMDS.Models
         public string Content { get; set; }
 
         public DateTime Date { get; set; }
+
+        public MessageStatus Status { get; set; }
 
         // un mesaj apartine unui chat
         public int? ChatId { get; set; }
