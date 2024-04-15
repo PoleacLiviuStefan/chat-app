@@ -25,9 +25,9 @@
             return 1;
         }
 
-        if (ViewBag.ChannelAccess.ContainsKey(chatId))
+        if (ViewBag.ChatAccess.ContainsKey(chatId))
         {
-            var acceptedUserList = ViewBag.ChannelAccess[chatId];
+            var acceptedUserList = ViewBag.ChatAccess[chatId];
             foreach (var user in acceptedUserList)
             {
                 if (user == ViewBag.UserCurent)
@@ -35,9 +35,9 @@
             }
         }
 
-        if (ViewBag.ChannelPendingAccess.ContainsKey(chatId))
+        if (ViewBag.ChatPendingAccess.ContainsKey(chatId))
         {
-            var pendingUserList = ViewBag.ChannelPendingAccess[chatId];
+            var pendingUserList = ViewBag.ChatPendingAccess[chatId];
             foreach (var user in pendingUserList)
             {
                 if (user == ViewBag.UserCurent)
@@ -56,11 +56,11 @@
 
         @if (UserIsMember(chat.Id) == 1)
         {
-            <a class="btn btn-success" href="/Channels/Show/@chat.Id">Afisare chat</a>
+            <a class="btn btn-success" href="/Chats/Show/@chat.Id">Afisare chat</a>
         }
         else if (UserIsMember(chat.Id) == 0)
         {
-            <form method="post" action="/Channels/Join/@chat.Id">
+            <form method="post" action="/Chats/Join/@chat.Id">
                 <button class="btn btn-info full-width-button" type="submit">Inscriere Chat</button>
             </form>
         }
@@ -86,7 +86,7 @@
         <ul class="pagination">
             <li class="page-item">
                 <a class="page-link"
-                   href="/Channels/Index?page=1@(string.IsNullOrEmpty(searchTerm) ? "" : "&searchTerm=" + searchTerm)" aria-label="Previous">
+                   href="/Chats/Index?page=1@(string.IsNullOrEmpty(searchTerm) ? "" : "&searchTerm=" + searchTerm)" aria-label="Previous">
                     <span aria-hidden="true">&laquo;</span>
                 </a>
             </li>
@@ -94,14 +94,14 @@
             {
                 <li class="page-item">
                     <a class="page-link"
-                       href="/Channels/Index?page=@i@(string.IsNullOrEmpty(searchTerm) ? "" : "&searchTerm=" + searchTerm)">
+                       href="/Chats/Index?page=@i@(string.IsNullOrEmpty(searchTerm) ? "" : "&searchTerm=" + searchTerm)">
                         @(i)
                     </a>
                 </li>
             }
             <li class="page-item">
                 <a class="page-link"
-                   href="/Channels/Index?page=@(ViewBag.lastPage)@(string.IsNullOrEmpty(searchTerm) ? "" : "&searchTerm=" + searchTerm)"
+                   href="/Chats/Index?page=@(ViewBag.lastPage)@(string.IsNullOrEmpty(searchTerm) ? "" : "&searchTerm=" + searchTerm)"
                    aria-label="Next">
                     <span aria-hidden="true">&raquo;</span>
                 </a>

@@ -22,12 +22,8 @@ namespace AplicatieMDS.Models
         // pentru popularea unui dropdown list
         [NotMapped]
         public IEnumerable<SelectListItem>? AllRoles { get; set; }
-
-<<<<<<< Updated upstream
-        public ICollection<ChatUser> ChannelUsers { get; set; } = new List<ChatUser>();
-=======
         public ICollection<ChatUser> ChatUsers { get; set; } = new List<ChatUser>();
->>>>>>> Stashed changes
+
 
     }
 }

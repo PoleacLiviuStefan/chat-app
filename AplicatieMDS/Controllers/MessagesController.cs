@@ -4,6 +4,7 @@ using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using System.Threading.Channels;
+using static AplicatieMDS.Models.Message;
 
 namespace AplicatieMDS.Controllers
 {
@@ -34,6 +35,7 @@ namespace AplicatieMDS.Controllers
         public IActionResult New(Message mess)
         {
             mess.Date = DateTime.Now;
+            mess.Status = MessageStatus.Unseen;
 
             if (ModelState.IsValid)
             {
@@ -114,6 +116,7 @@ namespace AplicatieMDS.Controllers
                 if (ModelState.IsValid)
                 {
                     mess.Content = requestMessage.Content;
+                    mess.Status = requestMessage.Status;
 
                     db.SaveChanges();
 
