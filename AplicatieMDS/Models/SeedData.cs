@@ -2,7 +2,7 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using AplicatieMDS.Models;
-
+using System.Text.Json;
 
 namespace AplicatieMDS.Models
 {
@@ -46,7 +46,8 @@ namespace AplicatieMDS.Models
                         NormalizedEmail = "ADMIN@TEST.COM",
                         Email = "admin@test.com",
                         NormalizedUserName = "ADMIN@TEST.COM",
-                        PasswordHash = hasher.HashPassword(null, "Admin1!")
+                        PasswordHash = hasher.HashPassword(null, "Admin1!"),
+                        AdditionalInfoJson = JsonSerializer.Serialize(new Dictionary<string, object> { { "userId", 0 } })
                     },
                     new ApplicationUser
                     {
@@ -56,7 +57,8 @@ namespace AplicatieMDS.Models
                         NormalizedEmail = "MODERATOR@TEST.COM",
                         Email = "moderator@test.com",
                         NormalizedUserName = "MODERATOR@TEST.COM",
-                        PasswordHash = hasher.HashPassword(null, "Moderator1!")
+                        PasswordHash = hasher.HashPassword(null, "Moderator1!"),
+                        AdditionalInfoJson = JsonSerializer.Serialize(new Dictionary<string, object> { { "userId", 0 } })
                     },
                     new ApplicationUser
                     {
@@ -66,7 +68,8 @@ namespace AplicatieMDS.Models
                         NormalizedEmail = "USER@TEST.COM",
                         Email = "user@test.com",
                         NormalizedUserName = "USER@TEST.COM",
-                        PasswordHash = hasher.HashPassword(null, "User1!")
+                        PasswordHash = hasher.HashPassword(null, "User1!"),
+                        AdditionalInfoJson = JsonSerializer.Serialize(new Dictionary<string, object> { { "userId", 0 } })
                     }
                 );
 

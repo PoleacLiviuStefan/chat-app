@@ -39,7 +39,7 @@ namespace AplicatieMDS.Controllers
         public IActionResult Index()
         {
 
-            Dictionary<int, List<string>> chatUserDictionary = db.ChatUsers
+            Dictionary<int, List    <string>> chatUserDictionary = db.ChatUsers
     .AsEnumerable()
     .GroupBy(chatUser => chatUser.ChatId)
     .ToDictionary(

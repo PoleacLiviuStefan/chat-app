@@ -30,6 +30,9 @@ namespace AplicatieMDS.Data.Migrations
                     b.Property<int>("AccessFailedCount")
                         .HasColumnType("int");
 
+                    b.Property<string>("AdditionalInfoJson")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("ConcurrencyStamp")
                         .IsConcurrencyToken()
                         .HasColumnType("nvarchar(max)");
@@ -144,6 +147,9 @@ namespace AplicatieMDS.Data.Migrations
                     b.Property<DateTime>("Date")
                         .HasColumnType("datetime2");
 
+                    b.Property<int>("Status")
+                        .HasColumnType("int");
+
                     b.Property<string>("UserId")
                         .HasColumnType("nvarchar(450)");
 
@@ -154,6 +160,31 @@ namespace AplicatieMDS.Data.Migrations
                     b.HasIndex("UserId");
 
                     b.ToTable("Messages");
+                });
+
+            modelBuilder.Entity("AplicatieMDS.Models.UserFriend", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
+
+                    b.Property<string>("FriendId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("UserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("FriendId");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("UserFriends");
                 });
 
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRole", b =>
@@ -336,6 +367,25 @@ namespace AplicatieMDS.Data.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("AplicatieMDS.Models.UserFriend", b =>
+                {
+                    b.HasOne("AplicatieMDS.Models.ApplicationUser", "Friend")
+                        .WithMany("FriendOf")
+                        .HasForeignKey("FriendId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.HasOne("AplicatieMDS.Models.ApplicationUser", "User")
+                        .WithMany("UserFriends")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("Friend");
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Microsoft.AspNetCore.Identity.IdentityRoleClaim<string>", b =>
                 {
                     b.HasOne("Microsoft.AspNetCore.Identity.IdentityRole", null)
@@ -393,7 +443,11 @@ namespace AplicatieMDS.Data.Migrations
 
                     b.Navigation("Chats");
 
+                    b.Navigation("FriendOf");
+
                     b.Navigation("Messages");
+
+                    b.Navigation("UserFriends");
                 });
 
             modelBuilder.Entity("AplicatieMDS.Models.Chat", b =>

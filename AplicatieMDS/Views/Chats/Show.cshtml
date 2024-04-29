@@ -21,7 +21,6 @@
         {
             <div class="d-flex flex-row justify-content-between p-3 border-1 border-top">
 
-                <a class="btn btn-success" href="/Chats/Edit/@Model.Id">Editeaza chat</a>
 
                 <form method="post" action="/Chats/Delete/@Model.Id">
 
@@ -87,7 +86,7 @@
 
                                 <div>
 
-                                    <a class="btn btn-outline-primary" href="@Url.Action("Edit", "Messages", new { id = mess.Id, chatId = Model.Id })"><i class="bi bi-pencil-square"></i>Editeaza</a>
+                                    <a class="btn btn-outline-primary" href="@Url.Action("Edit", "Messages", new { id = mess.Id, chatId = Model.Id })"><i class="bi bi-pencil-square"></i> </a>
 
                                 </div>
 
@@ -168,46 +167,3 @@
 
     </div>
 
-    <div class="card col-sm-3 padding-left-10">
-        Useri:
-
-        @foreach (var user in ViewBag.UserStatus)
-        {
-            <div class="accept-reject">
-                @if (user.Value == "1")
-                {
-                    <a>✔️ @user.Key </a>
-                }
-                else if (Model.UserId == ViewBag.UserCurent || ViewBag.EsteAdmin)
-                {
-                    <a>❓ @user.Key  </a>
-
-                    <form method="post" action="/Chats/Accept/@user.Key-@Model.Id">
-                        <button class="btn small-btn" type="submit">✔️</button>
-                    </form>
-
-                    <form method="post" action="/Chats/Reject/@user.Key-@Model.Id">
-                        <button class="btn small-btn" type="submit">❌</button>
-                    </form>
-                }
-
-                @if (user.Value == "1" && user.Key != ViewBag.UserNameCurent && (ViewBag.EsteAdmin || ViewBag.EsteModerator || Model.UserId == ViewBag.UserCurent))
-                {
-
-                    <form method="post" action="/Chats/Leave/@user.Key-@Model.Id">
-                        <button class="btn small-btn" type="submit">👋🏻</button>
-                    </form>
-                }
-
-                @if (user.Value == "1" && user.Key == ViewBag.UserNameCurent && Model.UserId != ViewBag.UserCurent)
-                {
-                    <form method="post" action="/Chats/Exit/@user.Key-@Model.Id">
-                        <button class="btn small-btn" type="submit">👋🏻</button>
-                    </form>
-
-                }
-            </div>
-        }
-
-
-    </div>

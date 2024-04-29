@@ -40,8 +40,56 @@ namespace AplicatieMDS.Controllers
 
                 return View();
             }
+        [Authorize(Roles = "User,Moderator,Admin")]
+        public IActionResult Index2()
+        {
+            var searchTerm = HttpContext.Request.Query["searchTerm"].ToString();
 
-            public async Task<ActionResult> Show(string id)
+            // Extragem utilizatorii și îi ordonăm
+            IQueryable<ApplicationUser> users = from user in db.Users
+                                                orderby user.UserName
+                                                select user;
+
+            // Verificăm dacă un termen de căutare a fost furnizat și filtrăm lista de utilizatori
+            if (!string.IsNullOrEmpty(searchTerm))
+            {
+                users = users.Where(user => user.UserName.Contains(searchTerm));
+            }
+
+            // Afisarea mesajului din TempData, dacă există
+            if (TempData.ContainsKey("message"))
+            {
+                ViewBag.Message = TempData["message"];
+                ViewBag.Alert = TempData["messageType"];
+            }
+
+            // Numărul total de utilizatori după filtrare
+            int totalItems = users.Count();
+
+            // Stabilim numărul de utilizatori pe pagină
+            int pageSize = 3;
+
+            // Obținem numărul paginii curente sau folosim 1 dacă nu este specificat
+            var currentPage = Convert.ToInt32(HttpContext.Request.Query["page"]);
+            if (currentPage == 0) currentPage = 1;
+
+            // Calculăm numărul total de pagini
+            var totalPages = (int)Math.Ceiling((double)totalItems / pageSize);
+
+            // Extragem utilizatorii pentru pagina curentă
+            var paginatedUsers = users.Skip((currentPage - 1) * pageSize).Take(pageSize).ToList();
+
+            // Pasăm lista de utilizatori, numărul total de pagini și pagina curentă la View
+            ViewBag.UsersList = paginatedUsers;
+            ViewBag.CurrentPage = currentPage;
+            ViewBag.TotalPages = totalPages;
+
+            return View();
+        }
+
+
+
+        public async Task<ActionResult> Show(string id)
             {
                 ApplicationUser user = db.Users.Find(id);
                 var roles = await _userManager.GetRolesAsync(user);

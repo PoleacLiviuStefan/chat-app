@@ -52,7 +52,7 @@
 @foreach (AplicatieMDS.Models.Chat chat in ViewBag.Chats)
 {
     <div class="card">
-        @Html.Partial("ChatInfo", chat)
+        @Html.Partial("ChatInfo", chat) 
 
         @if (UserIsMember(chat.Id) == 1)
         {

@@ -27,17 +27,27 @@
                          @if (User.IsInRole("Admin"))
                         {
                             <li class="nav-item">
-                                <a class="nav-link text-dark" asp-area="" asp-controller="Users" asp-action="Index">Afisare utilizatori</a>
+                                <a class="nav-link text-dark" asp-area="" asp-controller="Users" asp-action="Index">Afisare utilizatori Admin</a>
                             </li>
                         }
-
+                        <li class="nav-item">
+                            <a class="nav-link text-dark" asp-area="" asp-controller="Users" asp-action="Index2">Afisare Utilizatori</a>
+                        </li>
                      
                        
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Chats" asp-action="Index">Afisare chat</a>    
                             </li>
-                       
 
+                        @if (User.IsInRole("User")  || User.IsInRole("Moderator") || User.IsInRole("Admin"))
+                                    {
+                            <li class="nav-item">
+                                <form asp-controller="Users" asp-action="Index2" method="get">
+                                    <input type="text" name="searchTerm" placeholder="Caută utilizatori...">
+                                    <button type="submit">Caută</button>
+                                </form>
+                            </li>
+                        }
                      
 
                     </ul>
