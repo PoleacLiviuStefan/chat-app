@@ -17,12 +17,12 @@ namespace AplicatieMDS.Data
         public DbSet<Message> Messages { get; set; }
         public DbSet<ChatUser> ChatUsers { get; set; }
         public DbSet<UserFriend> UserFriends { get; set; } // Ensure this DbSet is declared
-
+        public DbSet<FriendInvitation> FriendInvitations { get; set; }
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
 
-            // Existing configuration for ChatUser
+            // Configurations for ChatUser
             builder.Entity<ChatUser>()
                 .HasKey(cu => new { cu.ChatId, cu.UserId });
 
@@ -36,21 +36,38 @@ namespace AplicatieMDS.Data
                 .WithMany(u => u.ChatUsers)
                 .HasForeignKey(cu => cu.UserId);
 
-            // Configuration for UserFriend relationships
+            // Configurations for UserFriend
             builder.Entity<UserFriend>()
-                .HasKey(uf => uf.Id); // Use Id as the primary key
+                .HasKey(uf => uf.Id);
 
             builder.Entity<UserFriend>()
                 .HasOne(uf => uf.User)
                 .WithMany(u => u.UserFriends)
                 .HasForeignKey(uf => uf.UserId)
-                .OnDelete(DeleteBehavior.Restrict); // Adjust delete behavior as needed
+                .OnDelete(DeleteBehavior.Restrict);
 
             builder.Entity<UserFriend>()
                 .HasOne(uf => uf.Friend)
                 .WithMany(u => u.FriendOf)
                 .HasForeignKey(uf => uf.FriendId)
-                .OnDelete(DeleteBehavior.Restrict); // Adjust delete behavior as needed
+                .OnDelete(DeleteBehavior.Restrict);
+
+            // Add configuration for FriendInvitation
+            builder.Entity<FriendInvitation>()
+                .HasKey(fi => fi.InvitationId);
+
+            builder.Entity<FriendInvitation>()
+                .HasOne(fi => fi.Sender)
+                .WithMany(u => u.SentInvitations)
+                .HasForeignKey(fi => fi.SenderId)
+                .OnDelete(DeleteBehavior.Restrict);  // Avoid deleting user when an invitation is deleted
+
+            builder.Entity<FriendInvitation>()
+                .HasOne(fi => fi.Receiver)
+                .WithMany(u => u.ReceivedInvitations)
+                .HasForeignKey(fi => fi.ReceiverId)
+                .OnDelete(DeleteBehavior.Restrict);  // Avoid deleting user when an invitation is deleted
         }
+
     }
 }

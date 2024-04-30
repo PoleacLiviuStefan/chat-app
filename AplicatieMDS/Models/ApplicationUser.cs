@@ -41,5 +41,7 @@ namespace AplicatieMDS.Models
 
         public virtual ICollection<UserFriend> FriendOf { get; set; }
 
+        public virtual ICollection<FriendInvitation> SentInvitations { get; set; } = new List<FriendInvitation>();
+        public virtual ICollection<FriendInvitation> ReceivedInvitations { get; set; } = new List<FriendInvitation>();
     }
 }

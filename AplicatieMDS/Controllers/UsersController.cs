@@ -189,8 +189,45 @@ namespace AplicatieMDS.Controllers
                 return RedirectToAction("Index");
             }
 
+        [HttpPost]
+        [Authorize(Roles = "User,Moderator,Admin")] // Ensure only authenticated users can send invitations
+        public async Task<IActionResult> SendInvitation(string receiverId)
+        {
+            if (string.IsNullOrEmpty(receiverId))
+            {
+                return BadRequest("Invalid receiver ID.");
+            }
 
-            [NonAction]
+            var senderId = _userManager.GetUserId(User); // Get the current logged in user's ID
+
+            if (senderId == receiverId)
+            {
+                return BadRequest("Cannot send invitation to yourself.");
+            }
+
+            // Check if the invitation already exists
+            bool alreadyInvited = db.FriendInvitations.Any(fi => fi.SenderId == senderId && fi.ReceiverId == receiverId);
+            if (alreadyInvited)
+            {
+                return BadRequest("Invitation already sent.");
+            }
+
+            // Create a new FriendInvitation
+            var invitation = new FriendInvitation
+            {
+                SenderId = senderId,
+                ReceiverId = receiverId,
+            };
+
+            db.FriendInvitations.Add(invitation);
+            await db.SaveChangesAsync();
+
+            return Ok(" Invitation sent successfully.");
+        }
+
+
+
+        [NonAction]
             public IEnumerable<SelectListItem> GetAllRoles()
             {
                 var selectList = new List<SelectListItem>();

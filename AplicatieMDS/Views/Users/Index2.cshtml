@@ -37,10 +37,12 @@
                     </div>
                     <div class="d-flex flex-row justify-content-between p-3">
 
-
-                        <a class="btn btn-success" href="/Users/Show/@user.Id">Add Friend</a> <!-- De facut controller pentru a trimite cerere de prietenie catre user.Id-->
-                        <!-- <a class="btn btn-success" href="/Users/Show/@user.Id">Conversate</a> -->
-
+                        <!-- De facut controller pentru a trimite cerere de prietenie catre user.Id-->
+                        <!-- <a class="btn btn-success" href="/Users/Show/@user.Id">Conversate</a> --> 
+                        <form method="post" action="/Users/SendInvitation">
+                            <input type="hidden" name="receiverId" value="@user.Id" />
+                            <button type="submit" class="btn btn-success">Add Friend</button>
+                        </form>
 
                        
                     </div>
