@@ -6,14 +6,15 @@ namespace AplicatieMDS.Models
     public class FriendInvitation
     {
         [Key]
-        public int InvitationId { get; set; } // Primary key for the invitation
+        public int InvitationId { get; set; }
 
-        public string SenderId { get; set; } // ID of the user who sent the invitation
+        public string SenderId { get; set; }
         [ForeignKey("SenderId")]
         public virtual ApplicationUser Sender { get; set; }
 
-        public string ReceiverId { get; set; } // ID of the user who received the invitation
+        public string ReceiverId { get; set; }
         [ForeignKey("ReceiverId")]
         public virtual ApplicationUser Receiver { get; set; }
     }
+
 }
