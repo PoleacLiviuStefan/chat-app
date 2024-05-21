@@ -1,0 +1,34 @@
+﻿@model List<AplicatieMDS.Models.UserFriend>
+
+@{
+    Layout = "_Layout";
+}
+
+<h1>Your Friends</h1>
+
+@if (TempData["Message"] != null)
+{
+    <div class="alert @TempData["MessageType"]">
+        @TempData["Message"]
+    </div>
+}
+
+@if (Model != null && Model.Any())
+{
+    <ul class="list-group">
+        @foreach (var friendRelation in Model)
+        {
+            var friend = friendRelation.UserId == ViewBag.UserCurent ? friendRelation.Friend : friendRelation.User;
+
+            <li class="list-group-item">
+                Friend: @friend.UserName
+                <span class="text-muted">Email: @friend.Email</span>
+                <a class="btn btn-success" href="@Url.Action("GetOrCreateChat", "Chats", new { friendId = friend.Id })">Afisare chat</a>
+            </li>
+        }
+    </ul>
+}
+else
+{
+    <p>You have no friends added.</p>
+}

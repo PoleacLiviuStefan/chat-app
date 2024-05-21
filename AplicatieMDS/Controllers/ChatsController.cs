@@ -3,75 +3,48 @@ using AplicatieMDS.Models;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
-
+using System.Linq;
 
 namespace AplicatieMDS.Controllers
 {
     public class ChatsController : Controller
     {
         private readonly ApplicationDbContext db;
-
         private readonly UserManager<ApplicationUser> _userManager;
-
         private readonly RoleManager<IdentityRole> _roleManager;
 
         public ChatsController(
             ApplicationDbContext context,
             UserManager<ApplicationUser> userManager,
-            RoleManager<IdentityRole> roleManager
-            )
+            RoleManager<IdentityRole> roleManager)
         {
             db = context;
-
             _userManager = userManager;
-
             _roleManager = roleManager;
         }
 
-
-        // Se afiseaza lista tuturor canalelor impreuna cu categoria 
-        // din care fac parte
-        // Pentru fiecare canal se afiseaza si userul care a creat canalul respectiv
-        // HttpGet implicit
-        
         public IActionResult Index()
         {
-
-            Dictionary<int, List    <string>> chatUserDictionary = db.ChatUsers
-    .AsEnumerable()
-    .GroupBy(chatUser => chatUser.ChatId)
-    .ToDictionary(
-        group => group.Key,
-        group => group.Select(chatUser => chatUser.UserId).ToList()
-    );
+            var chatUserDictionary = db.ChatUsers
+                .AsEnumerable()
+                .GroupBy(chatUser => chatUser.ChatId)
+                .ToDictionary(
+                    group => group.Key,
+                    group => group.Select(chatUser => chatUser.UserId).ToList()
+                );
 
             ViewBag.ChatAccess = chatUserDictionary;
+            ViewBag.ChatPendingAccess = chatUserDictionary;
 
-            Dictionary<int, List<string>> chatPendingUserDictionary = db.ChatUsers
-    .AsEnumerable()
-    .GroupBy(chatUser => chatUser.ChatId)
-    .ToDictionary(
-        group => group.Key,
-        group => group.Select(chatUser => chatUser.UserId).ToList()
-    );
+            var searchTerm = HttpContext.Request.Query["searchTerm"].ToString();
 
-            ViewBag.ChatPendingAccess = chatPendingUserDictionary;
-
-            var searchTerm = (HttpContext.Request.Query["searchTerm"]);
-
-            // Alegem sa afisam 3 canale pe pagina
             int _perPage = 3;
-
-            var chats = db.Chats.Include("User");
+            var chats = db.Chats.Include(c => c.CurrentUser).Include(c => c.FriendUser).AsQueryable();
 
             if (!string.IsNullOrEmpty(searchTerm))
             {
-                var query = db.Chats
-                .Include("User");
-
-               
+                chats = chats.Where(ch => ch.CurrentUser.UserName.Contains(searchTerm) || ch.FriendUser.UserName.Contains(searchTerm));
             }
 
             if (TempData.ContainsKey("message"))
@@ -80,36 +53,13 @@ namespace AplicatieMDS.Controllers
                 ViewBag.Alert = TempData["messageType"];
             }
 
-            // Fiind un numar variabil de canale, verificam de fiecare data utilizand
-            // metoda Count()
             int totalItems = chats.Count();
+            var currentPage = Convert.ToInt32(HttpContext.Request.Query["page"]);
+            var offset = currentPage == 0 ? 0 : (currentPage - 1) * _perPage;
 
-            // Se preia pagina curenta din View-ul asociat
-            // Numarul paginii este valoarea parametrului page din ruta
-            // /Chats/Index?page=valoare
-            var currentPage =
-            Convert.ToInt32(HttpContext.Request.Query["page"]);
-            // Pentru prima pagina offsetul o sa fie zero
-            // Pentru pagina 2 o sa fie 3
-            // Asadar offsetul este egal cu numarul de canale care au fost deja afisate pe paginile anterioare
-            var offset = 0;
-            // Se calculeaza offsetul in functie de numarul paginii la care suntem
-            if (!currentPage.Equals(0))
-            {
-                offset = (currentPage - 1) * _perPage;
-            }
+            var paginatedChats = chats.Skip(offset).Take(_perPage);
 
-
-
-            // Se preiau canalele corespunzatoare pentru fiecare pagina la care ne aflam
-            // in functie de offset
-            var paginatedChats =
-            chats.Skip(offset).Take(_perPage);
-
-            // Preluam numarul ultimei pagini
-            ViewBag.lastPage = Math.Ceiling((float)totalItems /
-            (float)_perPage);
-            // Trimitem canalele cu ajutorul unui ViewBag catre View-ul corespunzator
+            ViewBag.lastPage = Math.Ceiling((float)totalItems / (float)_perPage);
             ViewBag.Chats = paginatedChats;
 
             SetAccessRights();
@@ -120,34 +70,22 @@ namespace AplicatieMDS.Controllers
         [Authorize(Roles = "User,Moderator,Admin")]
         public IActionResult Index2()
         {
-
-            Dictionary<int, List<string>> chatUserDictionary = db.ChatUsers
-    .AsEnumerable()
-    .GroupBy(chatUser => chatUser.ChatId)
-    .ToDictionary(
-        group => group.Key,
-        group => group.Select(chatUser => chatUser.UserId).ToList()
-    );
+            var chatUserDictionary = db.ChatUsers
+                .AsEnumerable()
+                .GroupBy(chatUser => chatUser.ChatId)
+                .ToDictionary(
+                    group => group.Key,
+                    group => group.Select(chatUser => chatUser.UserId).ToList()
+                );
 
             ViewBag.ChatAccess = chatUserDictionary;
+            ViewBag.ChatPendingAccess = chatUserDictionary;
 
-            Dictionary<int, List<string>> chatPendingUserDictionary = db.ChatUsers
-    .AsEnumerable()
-    .GroupBy(chatUser => chatUser.ChatId)
-    .ToDictionary(
-        group => group.Key,
-        group => group.Select(chatUser => chatUser.UserId).ToList()
-    );
+            var searchTerm = HttpContext.Request.Query["searchTerm"].ToString();
 
-            ViewBag.ChatPendingAccess = chatPendingUserDictionary;
-
-            var searchTerm = (HttpContext.Request.Query["searchTerm"]);
-
-            // Alegem sa afisam 3 canale pe pagina
             int _perPage = 3;
-
-            List<int> chatInclude = db.ChatUsers.Where(row => row.UserId == _userManager.GetUserId(User)).Select(row => row.ChatId).ToList();
-
+            var userId = _userManager.GetUserId(User);
+            var chatInclude = db.ChatUsers.Where(row => row.UserId == userId).Select(row => row.ChatId).ToList();
 
             if (chatInclude.Count == 0)
             {
@@ -155,25 +93,14 @@ namespace AplicatieMDS.Controllers
                 TempData["messageType"] = "alert-danger";
             }
 
-
             ViewBag.ChatInclude = chatInclude;
 
-            var chats = db.Chats.Include("User").Where(row => chatInclude.Contains(row.Id));
-
-
+            var chats = db.Chats.Include(c => c.CurrentUser).Include(c => c.FriendUser).Where(ch => chatInclude.Contains(ch.Id)).AsQueryable();
 
             if (!string.IsNullOrEmpty(searchTerm))
             {
-                var query = db.Chats
-                .Include("User");
-
-                query = query.Where(ch => ch.UserId.Contains(searchTerm));
-
-                chats = query;
-             
+                chats = chats.Where(ch => ch.CurrentUser.UserName.Contains(searchTerm) || ch.FriendUser.UserName.Contains(searchTerm));
             }
-
-
 
             if (TempData.ContainsKey("message"))
             {
@@ -181,36 +108,13 @@ namespace AplicatieMDS.Controllers
                 ViewBag.Alert = TempData["messageType"];
             }
 
-            // Fiind un numar variabil de canale, verificam de fiecare data utilizand
-            // metoda Count()
             int totalItems = chats.Count();
+            var currentPage = Convert.ToInt32(HttpContext.Request.Query["page"]);
+            var offset = currentPage == 0 ? 0 : (currentPage - 1) * _perPage;
 
-            // Se preia pagina curenta din View-ul asociat
-            // Numarul paginii este valoarea parametrului page din ruta
-            // /Chats/Index?page=valoare
-            var currentPage =
-            Convert.ToInt32(HttpContext.Request.Query["page"]);
-            // Pentru prima pagina offsetul o sa fie zero
-            // Pentru pagina 2 o sa fie 3
-            // Asadar offsetul este egal cu numarul de canale care au fost deja afisate pe paginile anterioare
-            var offset = 0;
-            // Se calculeaza offsetul in functie de numarul paginii la care suntem
-            if (!currentPage.Equals(0))
-            {
-                offset = (currentPage - 1) * _perPage;
-            }
+            var paginatedChats = chats.Skip(offset).Take(_perPage);
 
-
-
-            // Se preiau canalele corespunzatoare pentru fiecare pagina la care ne aflam
-            // in functie de offset
-            var paginatedChats =
-            chats.Skip(offset).Take(_perPage);
-
-            // Preluam numarul ultimei pagini
-            ViewBag.lastPage = Math.Ceiling((float)totalItems /
-            (float)_perPage);
-            // Trimitem canalele cu ajutorul unui ViewBag catre View-ul corespunzator
+            ViewBag.lastPage = Math.Ceiling((float)totalItems / (float)_perPage);
             ViewBag.Chats = paginatedChats;
 
             SetAccessRights();
@@ -218,27 +122,23 @@ namespace AplicatieMDS.Controllers
             return View();
         }
 
-        // Se afiseaza un singur canal in functie de id-ul sau 
-        // impreuna cu categoria din care face parte
-        // In plus sunt preluate si toate mesajele asociate unui canal
-        // Se afiseaza si userul care a postat canalul respectiv
-        // HttpGet implicit
-
         [Authorize(Roles = "User,Moderator,Admin")]
         public IActionResult Show(int id)
         {
-            Chat chat = db.Chats.Include("User")
-                                         .Include("Messages")
-                                         .Include("Messages.User")
-                                         .Where(ch => ch.Id == id)
-                                         .First();
+            var chat = db.Chats.Include(c => c.CurrentUser)
+                                .Include(c => c.FriendUser)
+                                .Include(c => c.Messages)
+                                .ThenInclude(m => m.User)
+                                .FirstOrDefault(c => c.Id == id);
 
-            List<ChatUser> chatUserList = db.ChatUsers
-                                                      .Where(ch => ch.ChatId == id).ToList();
+            if (chat == null)
+            {
+                TempData["message"] = "Acest chat nu a fost găsit!";
+                TempData["messageType"] = "alert-danger";
+                return RedirectToAction("Index");
+            }
 
-      
-
-
+            var chatUserList = db.ChatUsers.Where(ch => ch.ChatId == id).ToList();
             SetAccessRights();
 
             if (User.IsInRole("Admin") || User.IsInRole("Moderator"))
@@ -246,32 +146,18 @@ namespace AplicatieMDS.Controllers
                 return View(chat);
             }
             else
-
-                foreach (ChatUser user in chatUserList)
+            {
+                if (chatUserList.Any(cu => cu.UserId == _userManager.GetUserId(User)))
                 {
-                    if (user.UserId == _userManager.GetUserId(User))
-                        return View(chat);
+                    return View(chat);
                 }
 
-            TempData["message"] = "Nu aveti drepturi pentru a vizualiza acest canal!";
-            TempData["messageType"] = "alert-danger";
-
-
-            if (TempData.ContainsKey("message"))
-            {
-                ViewBag.Message = TempData["message"];
-                ViewBag.Alert = TempData["messageType"];
+                TempData["message"] = "Nu aveti drepturi pentru a vizualiza acest canal!";
+                TempData["messageType"] = "alert-danger";
+                return RedirectToAction("Index");
             }
-
-            return RedirectToAction("Index");
-
-
-
         }
 
-
-        // Adaugarea unui mesaj asociat unui canal in baza de date
-        // Toate rolurile pot adauga mesaje in baza de date
         [HttpPost]
         [Authorize(Roles = "User,Moderator,Admin")]
         public IActionResult Show([FromForm] Message message)
@@ -285,126 +171,116 @@ namespace AplicatieMDS.Controllers
                 db.SaveChanges();
                 return Redirect("/Chats/Show/" + message.ChatId);
             }
-
             else
             {
-                Chat ch = db.Chats.Include("User")
-                                         .Include("Messages")
-                                         .Include("Messages.User")
-                                         .Where(ch => ch.Id == message.ChatId)
-                                         .First();
-
-
-
-
+                var chat = db.Chats.Include(c => c.CurrentUser)
+                                   .Include(c => c.FriendUser)
+                                   .Include(c => c.Messages)
+                                   .ThenInclude(m => m.User)
+                                   .FirstOrDefault(c => c.Id == message.ChatId);
 
                 SetAccessRights();
-
-                return View(ch);
+                return View(chat);
             }
         }
-
-
-
-        // Se afiseaza formularul in care se vor completa datele unui canal
-        // impreuna cu selectarea categoriei din care face parte
-
-        // HttpGet implicit
 
         [Authorize(Roles = "Moderator,Admin,User")]
         public IActionResult New()
         {
-            Chat chat = new Chat();
-
-            // Se preia lista de categorii cu ajutorul metodei GetAllCategories()
-            
-
-
+            var chat = new Chat();
             return View(chat);
         }
-
-        // Se adauga canalul in baza de date
 
         [Authorize(Roles = "Moderator,Admin,User")]
         [HttpPost]
         public IActionResult New(Chat chat)
         {
-         
-            // preluam id-ul utilizatorului care creeaza canalul
-            chat.UserId = _userManager.GetUserId(User);
+            var currentUserId = _userManager.GetUserId(User);
+            chat.CurrentUserId = currentUserId;
+
+            // Check if a chat already exists between the current user and the friend
+            var existingChat = db.Chats
+                .FirstOrDefault(c => (c.CurrentUserId == currentUserId && c.FriendUserId == chat.FriendUserId) ||
+                                     (c.CurrentUserId == chat.FriendUserId && c.FriendUserId == currentUserId));
+
+            if (existingChat != null)
+            {
+                TempData["message"] = "Chat already exists between the users.";
+                TempData["messageType"] = "alert-info";
+                return RedirectToAction("Index");
+            }
 
             if (ModelState.IsValid)
             {
                 db.Chats.Add(chat);
-
                 db.SaveChanges();
 
-                ChatUser chatUser = new ChatUser();
-                chatUser.ChatId = chat.Id;
-                chatUser.UserId = chat.UserId;
-             
+                var chatUser = new ChatUser
+                {
+                    ChatId = chat.Id,
+                    UserId = chat.CurrentUserId
+                };
+
                 db.ChatUsers.Add(chatUser);
-
                 db.SaveChanges();
 
-                TempData["message"] = "Canalul a fost creat";
+                TempData["message"] = "The chat has been created";
                 TempData["messageType"] = "alert-success";
                 return RedirectToAction("Index");
             }
             else
             {
-               
                 return View(chat);
             }
         }
 
-        // Se editeaza un canal existent in baza de date impreuna cu categoria din care face parte
-        // Categoria se selecteaza dintr-un dropdown
-        // Se afiseaza formularul impreuna cu datele aferente canalului din baza de date
-        // Doar utilizatorii cu rolul de Moderator sau Admin pot edita canale
-        // Adminii pot edita orice canal din baza de date
-        // Moderatorii pot edita doar canelele proprii (cele pe care ei le-au creat)
-        // HttpGet implicit
 
         [Authorize(Roles = "Moderator,Admin,User")]
         public IActionResult Edit(int id)
         {
+            var chat = db.Chats.FirstOrDefault(c => c.Id == id);
 
-            Chat chat = db.Chats.Where(ch => ch.Id == id)
-                                        .First();
+            if (chat == null)
+            {
+                TempData["message"] = "Canalul nu a fost găsit!";
+                TempData["messageType"] = "alert-danger";
+                return RedirectToAction("Index");
+            }
 
-           
-            if (chat.UserId == _userManager.GetUserId(User) || User.IsInRole("Moderator") || User.IsInRole("Admin"))
+            if (chat.CurrentUserId == _userManager.GetUserId(User) || User.IsInRole("Moderator") || User.IsInRole("Admin"))
             {
                 return View(chat);
             }
-
             else
             {
                 TempData["message"] = "Nu aveti dreptul sa faceti modificari asupra unui canal care nu va apartine";
                 TempData["messageType"] = "alert-danger";
                 return RedirectToAction("Index");
             }
-
         }
 
-        // Se adauga canalul modificat in baza de date
-        // Verificam rolul utilizatorilor care au dreptul sa editeze (Moderator,Admin sau User)
         [HttpPost]
         [Authorize(Roles = "Moderator,Admin,User")]
         public IActionResult Edit(int id, Chat requestChat)
         {
-            Chat chat = db.Chats.Find(id);
+            var chat = db.Chats.Find(id);
 
+            if (chat == null)
+            {
+                TempData["message"] = "Canalul nu a fost găsit!";
+                TempData["messageType"] = "alert-danger";
+                return RedirectToAction("Index");
+            }
 
             if (ModelState.IsValid)
             {
-                if (chat.UserId == _userManager.GetUserId(User) || User.IsInRole("Moderator") || User.IsInRole("Admin"))
+                if (chat.CurrentUserId == _userManager.GetUserId(User) || User.IsInRole("Moderator") || User.IsInRole("Admin"))
                 {
-                 
+                    chat.FriendUserId = requestChat.FriendUserId; // Update friend user ID or other properties as needed
+
+                    db.SaveChanges();
                     TempData["message"] = "Canalul a fost modificat";
                     TempData["messageType"] = "alert-success";
-                    db.SaveChanges();
                     return RedirectToAction("Index");
                 }
                 else
@@ -416,41 +292,36 @@ namespace AplicatieMDS.Controllers
             }
             else
             {
-              
                 return View(requestChat);
             }
         }
-
-
-
-        // Se sterge un canal din baza de date
-        // Utilizatorii cu rolul de Moderator sau Admin pot sterge canalele
-        // Adminii pot sterge orice canal din baza de date
 
         [HttpPost]
         [Authorize(Roles = "Moderator,Admin,User")]
         public ActionResult Delete(int id)
         {
-            Chat chat = db.Chats.Include("Messages")
-                                         .Where(ch => ch.Id == id)
-                                         .First();
+            var chat = db.Chats.Include(c => c.Messages)
+                               .FirstOrDefault(c => c.Id == id);
 
-            List<ChatUser> chatUserList = db.ChatUsers.Where(ch => ch.ChatId == id).ToList();
-
-            if (chat.UserId == _userManager.GetUserId(User) || User.IsInRole("Moderator") || User.IsInRole("Admin"))
+            if (chat == null)
             {
-                for (int i = 0; i < chatUserList.Count(); i++)
-                    db.ChatUsers.Remove(chatUserList[i]);
+                TempData["message"] = "Canalul nu a fost găsit!";
+                TempData["messageType"] = "alert-danger";
+                return RedirectToAction("Index");
+            }
 
+            var chatUserList = db.ChatUsers.Where(cu => cu.ChatId == id).ToList();
+
+            if (chat.CurrentUserId == _userManager.GetUserId(User) || User.IsInRole("Moderator") || User.IsInRole("Admin"))
+            {
+                db.ChatUsers.RemoveRange(chatUserList);
                 db.Chats.Remove(chat);
                 db.SaveChanges();
-
 
                 TempData["message"] = "Canalul a fost sters!";
                 TempData["messageType"] = "alert-success";
                 return RedirectToAction("Index");
             }
-
             else
             {
                 TempData["message"] = "Nu aveti dreptul sa stergeti un canal care nu va apartine";
@@ -459,17 +330,22 @@ namespace AplicatieMDS.Controllers
             }
         }
 
-
         [HttpPost]
         [Authorize(Roles = "Moderator,Admin,User")]
         public ActionResult CancelJoin(int id)
         {
-            ChatUser chatUser = db.ChatUsers
-            .FirstOrDefault(ch => ch.ChatId == id && ch.UserId == _userManager.GetUserId(User));
+            var chatUser = db.ChatUsers
+                             .FirstOrDefault(cu => cu.ChatId == id && cu.UserId == _userManager.GetUserId(User));
+
+            if (chatUser == null)
+            {
+                TempData["message"] = "Cererea nu a fost găsită!";
+                TempData["messageType"] = "alert-danger";
+                return RedirectToAction("Index");
+            }
 
             db.ChatUsers.Remove(chatUser);
             db.SaveChanges();
-
 
             TempData["message"] = "Cererea a fost stearsa!";
             TempData["messageType"] = "alert-success";
@@ -480,18 +356,30 @@ namespace AplicatieMDS.Controllers
         [Authorize(Roles = "Moderator,Admin,User")]
         public ActionResult Reject(string id)
         {
-            var strings = id.Split("-");
-            var userName = strings[0];
-            var chatId = int.Parse(strings[1]);
-            ApplicationUser user = db.Users.FirstOrDefault(u => u.UserName == userName);
+            var parts = id.Split("-");
+            var userName = parts[0];
+            var chatId = int.Parse(parts[1]);
+            var user = db.Users.FirstOrDefault(u => u.UserName == userName);
 
+            if (user == null)
+            {
+                TempData["message"] = "Utilizatorul nu a fost găsit!";
+                TempData["messageType"] = "alert-danger";
+                return RedirectToAction("Show", new { id = chatId });
+            }
 
-            ChatUser chatUser = db.ChatUsers
-            .FirstOrDefault(ch => ch.ChatId == chatId && ch.UserId == user.Id);
+            var chatUser = db.ChatUsers
+                             .FirstOrDefault(cu => cu.ChatId == chatId && cu.UserId == user.Id);
+
+            if (chatUser == null)
+            {
+                TempData["message"] = "Cererea nu a fost găsită!";
+                TempData["messageType"] = "alert-danger";
+                return RedirectToAction("Show", new { id = chatId });
+            }
 
             db.ChatUsers.Remove(chatUser);
             db.SaveChanges();
-
 
             TempData["message"] = "Cererea a fost respinsa!";
             TempData["messageType"] = "alert-success";
@@ -502,23 +390,38 @@ namespace AplicatieMDS.Controllers
         [Authorize(Roles = "Moderator,Admin,User")]
         public ActionResult Accept(string id)
         {
-            var strings = id.Split("-");
-            var userName = strings[0];
-            var chatId = int.Parse(strings[1]);
-            ApplicationUser user = db.Users.FirstOrDefault(u => u.UserName == userName);
+            var parts = id.Split("-");
+            var userName = parts[0];
+            var chatId = int.Parse(parts[1]);
+            var user = db.Users.FirstOrDefault(u => u.UserName == userName);
 
+            if (user == null)
+            {
+                TempData["message"] = "Utilizatorul nu a fost găsit!";
+                TempData["messageType"] = "alert-danger";
+                return RedirectToAction("Show", new { id = chatId });
+            }
 
-            ChatUser chatUser = db.ChatUsers
-            .FirstOrDefault(ch => ch.ChatId == chatId && ch.UserId == user.Id);
+            var chatUser = db.ChatUsers
+                             .FirstOrDefault(cu => cu.ChatId == chatId && cu.UserId == user.Id);
+
+            if (chatUser == null)
+            {
+                TempData["message"] = "Cererea nu a fost găsită!";
+                TempData["messageType"] = "alert-danger";
+                return RedirectToAction("Show", new { id = chatId });
+            }
+
             db.ChatUsers.Remove(chatUser);
 
-            ChatUser updatedChatUser = new ChatUser();
-            updatedChatUser.ChatId = chatId;
-            updatedChatUser.UserId = user.Id;
+            var updatedChatUser = new ChatUser
+            {
+                ChatId = chatId,
+                UserId = user.Id
+            };
+
             db.ChatUsers.Add(updatedChatUser);
-
             db.SaveChanges();
-
 
             TempData["message"] = "Cererea a fost acceptata!";
             TempData["messageType"] = "alert-success";
@@ -529,79 +432,148 @@ namespace AplicatieMDS.Controllers
         [Authorize(Roles = "Moderator,Admin,User")]
         public ActionResult Join(int id)
         {
-            ChatUser chatUser = new ChatUser();
-
-            chatUser.ChatId = id;
-            chatUser.UserId = _userManager.GetUserId(User);
-
+            var chatUser = new ChatUser
+            {
+                ChatId = id,
+                UserId = _userManager.GetUserId(User)
+            };
 
             db.ChatUsers.Add(chatUser);
             db.SaveChanges();
-
 
             TempData["message"] = "S-a solicitat inscrierea!";
             TempData["messageType"] = "alert-success";
             return RedirectToAction("Index");
         }
 
-
-        //Eliminarea userilor din canale
         [HttpPost]
         [Authorize(Roles = "Moderator,Admin,User")]
         public ActionResult Leave(string id)
         {
-            var strings = id.Split("-");
-            var userName = strings[0];
-            var channelId = int.Parse(strings[1]);
-            ApplicationUser user = db.Users.FirstOrDefault(u => u.UserName == userName);
+            var parts = id.Split("-");
+            var userName = parts[0];
+            var chatId = int.Parse(parts[1]);
+            var user = db.Users.FirstOrDefault(u => u.UserName == userName);
 
+            if (user == null)
+            {
+                TempData["message"] = "Utilizatorul nu a fost găsit!";
+                TempData["messageType"] = "alert-danger";
+                return RedirectToAction("Show", new { id = chatId });
+            }
 
-            ChatUser chatUser = db.ChatUsers
-            .FirstOrDefault(ch => ch.ChatId == channelId && ch.UserId == user.Id);
+            var chatUser = db.ChatUsers
+                             .FirstOrDefault(cu => cu.ChatId == chatId && cu.UserId == user.Id);
+
+            if (chatUser == null)
+            {
+                TempData["message"] = "Utilizatorul nu a fost găsit în canal!";
+                TempData["messageType"] = "alert-danger";
+                return RedirectToAction("Show", new { id = chatId });
+            }
 
             db.ChatUsers.Remove(chatUser);
             db.SaveChanges();
-
 
             TempData["message"] = "Utilizatorul a fost exclus!";
             TempData["messageType"] = "alert-success";
-            return RedirectToAction("Show", new { id = channelId });
+            return RedirectToAction("Show", new { id = chatId });
         }
 
-        //Userii pot iesi singuri din canale
+        [Authorize(Roles = "User,Moderator,Admin")]
+        public async Task<IActionResult> GetOrCreateChat(string friendId)
+        {
+            var currentUserId = _userManager.GetUserId(User);
+
+            // Check if a chat already exists between the current user and the friend
+            var existingChat = await db.Chats
+                .FirstOrDefaultAsync(c => (c.CurrentUserId == currentUserId && c.FriendUserId == friendId) ||
+                                          (c.CurrentUserId == friendId && c.FriendUserId == currentUserId));
+
+            if (existingChat != null)
+            {
+                // Chat already exists, redirect to the chat
+                return RedirectToAction("Show", new { id = existingChat.Id });
+            }
+
+            // Create a new chat if it doesn't exist
+            var chat = new Chat
+            {
+                CurrentUserId = currentUserId,
+                FriendUserId = friendId
+            };
+
+            if (ModelState.IsValid)
+            {
+                db.Chats.Add(chat);
+                await db.SaveChangesAsync();
+
+                var chatUser = new ChatUser
+                {
+                    ChatId = chat.Id,
+                    UserId = chat.CurrentUserId
+                };
+
+                db.ChatUsers.Add(chatUser);
+                await db.SaveChangesAsync();
+
+                TempData["message"] = "The chat has been created";
+                TempData["messageType"] = "alert-success";
+                return RedirectToAction("Show", new { id = chat.Id });
+            }
+            else
+            {
+                TempData["message"] = "Failed to create the chat";
+                TempData["messageType"] = "alert-danger";
+                return RedirectToAction("ShowAllFriends");
+            }
+        }
+
+
+
+
+        [Authorize(Roles = "Moderator,Admin,User")]
         public ActionResult Exit(string id)
         {
-            var strings = id.Split("-");
-            var userName = strings[0];
-            var channelId = int.Parse(strings[1]);
-            ApplicationUser user = db.Users.FirstOrDefault(u => u.UserName == userName);
+            var parts = id.Split("-");
+            var userName = parts[0];
+            var chatId = int.Parse(parts[1]);
+            var user = db.Users.FirstOrDefault(u => u.UserName == userName);
 
+            if (user == null)
+            {
+                TempData["message"] = "Utilizatorul nu a fost găsit!";
+                TempData["messageType"] = "alert-danger";
+                return RedirectToAction("Index2", new { id = chatId });
+            }
 
-            ChatUser chatUser = db.ChatUsers
-            .FirstOrDefault(ch => ch.ChatId == channelId && ch.UserId == user.Id);
+            var chatUser = db.ChatUsers
+                             .FirstOrDefault(cu => cu.ChatId == chatId && cu.UserId == user.Id);
+
+            if (chatUser == null)
+            {
+                TempData["message"] = "Utilizatorul nu a fost găsit în canal!";
+                TempData["messageType"] = "alert-danger";
+                return RedirectToAction("Index2", new { id = chatId });
+            }
 
             db.ChatUsers.Remove(chatUser);
             db.SaveChanges();
 
-            return RedirectToAction("Index2", new { id = channelId });
+            return RedirectToAction("Index2", new { id = chatId });
         }
 
-
-        // Conditiile de afisare a butoanelor de editare si stergere
         private void SetAccessRights()
         {
             ViewBag.EsteAdmin = User.IsInRole("Admin");
             ViewBag.EsteModerator = User.IsInRole("Moderator");
-
             ViewBag.UserCurent = _userManager.GetUserId(User);
             ViewBag.UserNameCurent = _userManager.GetUserName(User);
         }
 
-      
         public IActionResult IndexNou()
         {
             return View();
         }
     }
-
 }

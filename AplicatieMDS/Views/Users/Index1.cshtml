@@ -1,0 +1,32 @@
+﻿@model List<AplicatieMDS.Models.UserFriend>
+
+@{
+    Layout = "_Layout";
+}
+
+<h1>Your Friends</h1>
+
+@if (TempData["Message"] != null)
+{
+    <div class="alert @TempData["MessageType"]">
+        @TempData["Message"]
+    </div>
+}
+
+@if (Model != null && Model.Any())
+{
+    <ul class="list-group">
+        @foreach (var friend in Model)
+        {
+            <li class="list-group-item">
+                Friend: @friend.Friend.UserName
+                <span class="text-muted">Email: @friend.Friend.Email</span>
+
+            </li>
+        }
+    </ul>
+}
+else
+{
+    <p>You have no friends added.</p>
+}

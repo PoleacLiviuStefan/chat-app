@@ -9,11 +9,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
 
-namespace AplicatieMDS.Data.Migrations
+namespace AplicatieMDS.Migrations
 {
     [DbContext(typeof(ApplicationDbContext))]
-    [Migration("20240430090349_FriendInvitationsProperty")]
-    partial class FriendInvitationsProperty
+    [Migration("20240520222541_ModifyChatModel")]
+    partial class ModifyChatModel
     {
         protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
@@ -106,12 +106,19 @@ namespace AplicatieMDS.Data.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"), 1L, 1);
 
-                    b.Property<string>("UserId")
+                    b.Property<string>("CurrentUserId")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(450)");
+
+                    b.Property<string>("FriendUserId")
+                        .IsRequired()
                         .HasColumnType("nvarchar(450)");
 
                     b.HasKey("Id");
 
-                    b.HasIndex("UserId");
+                    b.HasIndex("CurrentUserId");
+
+                    b.HasIndex("FriendUserId");
 
                     b.ToTable("Chats");
                 });
@@ -138,6 +145,12 @@ namespace AplicatieMDS.Data.Migrations
                         .HasColumnType("int");
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("InvitationId"), 1L, 1);
+
+                    b.Property<bool?>("Accepted")
+                        .HasColumnType("bit");
+
+                    b.Property<DateTime>("CreatedDate")
+                        .HasColumnType("datetime2");
 
                     b.Property<string>("ReceiverId")
                         .IsRequired()
@@ -353,11 +366,21 @@ namespace AplicatieMDS.Data.Migrations
 
             modelBuilder.Entity("AplicatieMDS.Models.Chat", b =>
                 {
-                    b.HasOne("AplicatieMDS.Models.ApplicationUser", "User")
-                        .WithMany("Chats")
-                        .HasForeignKey("UserId");
+                    b.HasOne("AplicatieMDS.Models.ApplicationUser", "CurrentUser")
+                        .WithMany("ChatsCreated")
+                        .HasForeignKey("CurrentUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
 
-                    b.Navigation("User");
+                    b.HasOne("AplicatieMDS.Models.ApplicationUser", "FriendUser")
+                        .WithMany("ChatsParticipated")
+                        .HasForeignKey("FriendUserId")
+                        .OnDelete(DeleteBehavior.Restrict)
+                        .IsRequired();
+
+                    b.Navigation("CurrentUser");
+
+                    b.Navigation("FriendUser");
                 });
 
             modelBuilder.Entity("AplicatieMDS.Models.ChatUser", b =>
@@ -487,7 +510,9 @@ namespace AplicatieMDS.Data.Migrations
                 {
                     b.Navigation("ChatUsers");
 
-                    b.Navigation("Chats");
+                    b.Navigation("ChatsCreated");
+
+                    b.Navigation("ChatsParticipated");
 
                     b.Navigation("FriendOf");
 
