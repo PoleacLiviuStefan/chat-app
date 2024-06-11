@@ -1,0 +1,17 @@
+﻿@model AplicatieMDS.Models.Message
+
+<div class="card">
+    <form onsubmit="return sendMessage(this);">
+        <div class="card-body">
+            <input type="hidden" name="ChatId" value="@Model.ChatId" />
+
+            <label>Continut mesaj</label>
+            <br />
+            <textarea class="form-control" name="Content"></textarea>
+            @Html.ValidationMessage("Content", null, new { @class = "text-danger"})
+
+            <br /><br />
+            <button class="btn btn-success" type="submit">Adauga mesaj</button>
+        </div>
+    </form>
+</div>
