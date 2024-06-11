@@ -1,0 +1,48 @@
+﻿@model AplicatieMDS.Models.Message
+
+<div class="container message" data-message-id="@Model.Id">
+    <div class="row">
+        <div class="col-md-2"></div>
+
+        <div class="col-md-8">
+            <div>
+                <strong><i class="bi bi-person"></i> @(Model.User?.UserName ?? "Unknown User")</strong>
+                <small>@Model.Date.ToString("g")</small> <!-- Formatul general pentru afișarea datei și orei -->
+
+                <p>
+                    @using System.Text.RegularExpressions
+                    @{
+                        var content = Model.Content ?? string.Empty;
+                    }
+
+                    @if (content.Contains(".jpeg") || content.Contains(".jpg") || content.Contains(".gif") || content.Contains(".png") || content.Contains(".JPG"))
+                    {
+                        <img src="@content" alt="Imagine încorporată" class="img-fluid">
+                    }
+                    else if (content.Contains("youtube.com") || content.Contains("youtu.be"))
+                    {
+                        var videoId = Regex.Match(content, @"(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})").Groups[1].Value;
+                        <iframe width='560' height='315' src='https://www.youtube.com/embed/@videoId' frameborder='0' allowfullscreen></iframe>
+                    }
+                    else
+                    {
+                        @Html.Raw(content)
+                    }
+                </p>
+            </div>
+
+            <div class="d-flex">
+                <div>
+                    <button type="button" class="btn btn-outline-primary" onclick="openEditModal(@Model.Id)"><i class="bi bi-pencil-square"></i> Edit</button>
+                </div>
+                <div>
+                    <button type="button" class="btn btn-outline-danger" onclick="deleteMessage(@Model.Id)"><i class="bi bi-trash"></i> Sterge</button>
+                </div>
+            </div>
+
+            <br />
+        </div>
+
+        <div class="col-md-2"></div>
+    </div>
+</div>

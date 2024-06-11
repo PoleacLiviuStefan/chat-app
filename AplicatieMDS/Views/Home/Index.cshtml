@@ -2,10 +2,145 @@
     ViewData["Title"] = "Home Page";
 }
 
-<div class="text-center-center">
+<div class="text-center">
     <h1 class="display-4">Bine ați venit!</h1>
-    <h2>Pentru a va putea accesa conversatiile vă rugăm sa vă autentificați!</h2>
+    <h2>Pentru a vă putea accesa conversațiile vă rugăm să vă autentificați!</h2>
     <h2>În cazul în care nu aveți deja un cont va trebui să vă înregistrați!</h2>
-
 </div>
+
+@if (ViewBag.Friends != null && ((IEnumerable<AplicatieMDS.Models.UserFriend>)ViewBag.Friends).Any())
+{
+    <ul class="list-group">
+        @foreach (var friendRelation in (IEnumerable<AplicatieMDS.Models.UserFriend>)ViewBag.Friends)
+        {
+            var friend = friendRelation.UserId == ViewBag.UserCurent ? friendRelation.Friend : friendRelation.User;
+            var chatId = ((IEnumerable<AplicatieMDS.Models.Chat>)ViewBag.Chats).FirstOrDefault(c => (c.CurrentUserId == friend.Id && c.FriendUserId == ViewBag.UserCurent) || (c.FriendUserId == friend.Id && c.CurrentUserId == ViewBag.UserCurent))?.Id;
+
+            <li class="list-group-item">
+                Friend: @friend.UserName
+                <span class="text-muted">Email: @friend.Email</span>
+                <button class="btn btn-success" onclick="loadChatMessages(@chatId)">Afisare chat</button>
+            </li>
+        }
+    </ul>
+}
+else
+{
+    <p>You have no friends added.</p>
+}
+
+<div id="chatMessages">
+    <!-- Aici vor fi încărcate mesajele de chat -->
+</div>
+
+<div id="messageForm">
+    <!-- Aici va fi încărcat formularul de trimitere a mesajelor -->
+</div>
+
+<div id="editMessageModalContainer"></div>
+
+
+
+
+
+@section Scripts {
+    <script>
+        function loadChatMessages(chatId) {
+            $.ajax({
+                url: '@Url.Action("GetChatMessages", "Home")',
+                type: 'GET',
+                data: { chatId: chatId },
+                success: function (data) {
+                    $('#chatMessages').html(data);
+                    loadMessageForm(chatId); // Încarcă formularul de trimitere a mesajelor
+                },
+                error: function () {
+                    alert('Failed to load chat messages.');
+                }
+            });
+        }
+
+        function loadMessageForm(chatId) {
+            $.ajax({
+                url: '@Url.Action("LoadMessageForm", "Home")',
+                type: 'GET',
+                data: { chatId: chatId },
+                success: function (data) {
+                    $('#messageForm').html(data);
+                },
+                error: function () {
+                    alert('Failed to load message form.');
+                }
+            });
+        }
+
+        function sendMessage(form) {
+            $.ajax({
+                url: '@Url.Action("SendMessage", "Home")',
+                type: 'POST',
+                data: $(form).serialize(),
+                success: function (data) {
+                    $('#chatMessages').append(data); // Adaugă mesajul nou în lista existentă
+                    form.reset(); // Resetează formularul
+                },
+                error: function () {
+                    alert('Failed to send message.');
+                }
+            });
+            return false; // Previne reîncărcarea paginii
+        }
+
+        function openEditModal(messageId) {
+            $.ajax({
+                url: '@Url.Action("LoadEditMessageForm", "Home")',
+                type: 'GET',
+                data: { id: messageId },
+                success: function (data) {
+                    $('#editMessageModalContainer').html(data);
+                    $('#editMessageModal').modal('show');
+                },
+                error: function () {
+                    alert('Failed to load edit form.');
+                }
+            });
+        }
+
+        function saveEditMessage() {
+            var form = $('#editMessageForm');
+            $.ajax({
+                url: '@Url.Action("EditMessage", "Home")',
+                type: 'POST',
+                data: form.serialize(),
+                success: function (data) {
+                    var messageId = $(data).filter('.message').data('message-id');
+                    $('#chatMessages .message[data-message-id="' + messageId + '"]').replaceWith(data);
+                    $('#editMessageModal').modal('hide');
+                },
+                error: function () {
+                    alert('Failed to save message.');
+                }
+            });
+        }
+
+        function deleteMessage(messageId) {
+            if (confirm('Ești sigur că vrei să ștergi acest mesaj?')) {
+                $.ajax({
+                    url: '@Url.Action("DeleteMessage", "Home")',
+                    type: 'POST',
+                    data: { id: messageId },
+                    success: function () {
+                        $('#chatMessages .message[data-message-id="' + messageId + '"]').remove();
+                    },
+                    error: function () {
+                        alert('Failed to delete message.');
+                    }
+                });
+            }
+        }
+    </script>
+}
+
+
+
+
 

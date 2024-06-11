@@ -1,0 +1,24 @@
+﻿@model AplicatieMDS.Models.Message
+
+<div class="modal fade" id="editMessageModal" tabindex="-1" aria-labelledby="editMessageModalLabel" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="editMessageModalLabel">Editare mesaj</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editMessageForm">
+                    <input type="hidden" name="Id" value="@Model.Id" />
+                    <input type="hidden" name="ChatId" value="@Model.ChatId" />
+                    <div class="mb-3">
+                        <label for="messageContent" class="form-label">Conținut mesaj</label>
+                        <textarea class="form-control" id="messageContent" name="Content">@Model.Content</textarea>
+                        @Html.ValidationMessage("Content", null, new { @class = "text-danger" })
+                    </div>
+                    <button type="button" class="btn btn-primary" onclick="saveEditMessage()">Salvează</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
