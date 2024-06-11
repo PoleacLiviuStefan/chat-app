@@ -1,0 +1,41 @@
+﻿@model List<AplicatieMDS.Models.FriendInvitation>
+
+@{
+    Layout = "_Layout";
+}
+
+<h1>Received Invitations</h1>
+
+@if (TempData["Message"] != null)
+{
+    <div class="alert @TempData["MessageType"]">
+        @TempData["Message"]
+    </div>
+}
+
+@if (Model != null && Model.Any())
+{
+    <ul class="list-group">
+        @foreach (var invitation in Model)
+        {
+            <li class="list-group-item">
+                From: @invitation.Sender.UserName
+                <span class="text-muted">on @invitation.CreatedDate.ToString("dd MMM yyyy")</span>
+                <div class="col-2">
+                <form method="post" action="/Users/AcceptInvitation">
+                    <input type="hidden" name="invitationId" value="@invitation.InvitationId" />
+                    <button type="submit" class="btn btn-success">Accept</button>
+                </form>
+                <form method="post" action="/Users/DeclineInvitation">
+                    <input type="hidden" name="invitationId" value="@invitation.InvitationId" />
+                    <button type="submit" class="btn btn-danger">Decline</button>
+                </form>
+                </div>
+            </li>
+        }
+    </ul>
+}
+else
+{
+    <p>No invitations received.</p>
+}

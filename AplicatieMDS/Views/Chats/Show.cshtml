@@ -1,7 +1,6 @@
 ﻿@model AplicatieMDS.Models.Chat
 
-
-@* Afisarea unui chat*@
+@* Afisarea unui chat *@
 
 @if (TempData["message"] != null)
 {
@@ -17,20 +16,14 @@
 
         @Html.Partial("ChatInfo", Model)
 
-        @if (Model.UserId == ViewBag.UserCurent || ViewBag.EsteModerator || ViewBag.EsteAdmin)
+        @if (Model.CurrentUserId == ViewBag.UserCurent || ViewBag.EsteModerator || ViewBag.EsteAdmin || Model.FriendUserId == ViewBag.UserCurent)
         {
             <div class="d-flex flex-row justify-content-between p-3 border-1 border-top">
-
-
                 <form method="post" action="/Chats/Delete/@Model.Id">
-
                     <button class="btn btn-danger" type="submit">Sterge chat</button>
-
                 </form>
-
             </div>
         }
-
 
         <br />
         <br />
@@ -44,9 +37,7 @@
                     <div class="col-md-2"></div>
 
                     <div class="col-md-8">
-
                         <div>
-
                             <strong><i class="bi bi-person"></i>@mess.User.UserName</strong>
                             <small>@mess.Date</small>
 
@@ -69,101 +60,58 @@
                                 {
                                     @Html.Raw(content)
                                 }
-
                             </p>
-
-
-
-
                         </div>
 
-
-
-                        @if (mess.UserId == ViewBag.UserCurent || ViewBag.EsteModerator || ViewBag.EsteAdmin || Model.UserId == ViewBag.UserCurent)
+                        @if (mess.UserId == ViewBag.UserCurent || ViewBag.EsteModerator || ViewBag.EsteAdmin || Model.CurrentUserId == ViewBag.UserCurent || Model.FriendUserId == ViewBag.UserCurent)
                         {
-
                             <div class="d-flex">
-
                                 <div>
-
                                     <a class="btn btn-outline-primary" href="@Url.Action("Edit", "Messages", new { id = mess.Id, chatId = Model.Id })"><i class="bi bi-pencil-square"></i> </a>
-
                                 </div>
-
                                 <div>
-
                                     <form method="post" action="/Messages/Delete/@mess.Id">
-
                                         <button class="btn btn-outline-danger" type="submit"><i class="bi bi-trash"></i>Sterge</button>
-
                                     </form>
-
                                 </div>
-
                             </div>
                         }
 
                         <br />
-
                     </div>
 
                     <div class="col-md-2"></div>
-
                 </div>
-
             </div>
         }
-
 
         @* Afisarea formularului in care se poate adauga un mesaj *@
 
         <div class="container">
-
             <div class="row">
-
                 <div class="col-md-2"></div>
 
                 <div class="col-md-8">
-
                     <div class="card">
-
                         <form method="post" action="/Chats/Show/@Model.Id">
-
                             <div class="card-body">
-
                                 <input type="hidden" name="ChatId" value="@Model.Id" />
 
                                 <label>Continut mesaj</label>
                                 <br />
-
                                 <textarea class="form-control" name="Content"></textarea>
-
                                 @Html.ValidationMessage("Content", null, new { @class = "text-danger"})
 
                                 <br /><br />
-
-                                <button class="btn btn-success " type="submit">Adauga mesaj</button>
-
+                                <button class="btn btn-success" type="submit">Adauga mesaj</button>
                             </div>
-
                         </form>
-
                     </div>
-
                     <br /><br />
-
                 </div>
 
                 <div class="col-md-2"></div>
-
-
             </div>
-
-
-
         </div>
-
-
-
     </div>
-
+</div>

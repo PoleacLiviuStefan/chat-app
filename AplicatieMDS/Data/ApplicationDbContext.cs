@@ -1,7 +1,6 @@
 ﻿using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using AplicatieMDS.Models;
-using System.Threading.Channels;
 
 namespace AplicatieMDS.Data
 {
@@ -12,12 +11,13 @@ namespace AplicatieMDS.Data
         {
         }
 
-        public DbSet<ApplicationUser> ApplicationUsers { get; set; }
+        public DbSet<ApplicationUser> Users { get; set; } // Renamed from ApplicationUsers to Users
         public DbSet<Chat> Chats { get; set; }
         public DbSet<Message> Messages { get; set; }
         public DbSet<ChatUser> ChatUsers { get; set; }
-        public DbSet<UserFriend> UserFriends { get; set; } // Ensure this DbSet is declared
+        public DbSet<UserFriend> UserFriends { get; set; }
         public DbSet<FriendInvitation> FriendInvitations { get; set; }
+
         protected override void OnModelCreating(ModelBuilder builder)
         {
             base.OnModelCreating(builder);
@@ -60,14 +60,26 @@ namespace AplicatieMDS.Data
                 .HasOne(fi => fi.Sender)
                 .WithMany(u => u.SentInvitations)
                 .HasForeignKey(fi => fi.SenderId)
-                .OnDelete(DeleteBehavior.Restrict);  // Avoid deleting user when an invitation is deleted
+                .OnDelete(DeleteBehavior.Restrict);
 
             builder.Entity<FriendInvitation>()
                 .HasOne(fi => fi.Receiver)
                 .WithMany(u => u.ReceivedInvitations)
                 .HasForeignKey(fi => fi.ReceiverId)
-                .OnDelete(DeleteBehavior.Restrict);  // Avoid deleting user when an invitation is deleted
-        }
+                .OnDelete(DeleteBehavior.Restrict);
 
+            // Configurations for Chat
+            builder.Entity<Chat>()
+                .HasOne(c => c.CurrentUser)
+                .WithMany(u => u.ChatsCreated)
+                .HasForeignKey(c => c.CurrentUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+
+            builder.Entity<Chat>()
+                .HasOne(c => c.FriendUser)
+                .WithMany(u => u.ChatsParticipated)
+                .HasForeignKey(c => c.FriendUserId)
+                .OnDelete(DeleteBehavior.Restrict);
+        }
     }
 }

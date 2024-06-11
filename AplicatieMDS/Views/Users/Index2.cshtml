@@ -5,6 +5,12 @@
     string searchTerm = Context.Request.Query["searchTerm"]; // Obține searchTerm din ViewData
 }
 <div class="row">
+    @if (TempData["Message"] != null)
+    {
+        <div class="alert @TempData["MessageType"]">
+            @TempData["Message"]
+        </div>
+    }
     @foreach (var user in ViewBag.UsersList)
     {
         <div class="col-4 mb-4">
@@ -38,22 +44,25 @@
                     <div class="d-flex flex-row justify-content-between p-3">
 
                         <!-- De facut controller pentru a trimite cerere de prietenie catre user.Id-->
-                        <!-- <a class="btn btn-success" href="/Users/Show/@user.Id">Conversate</a> --> 
+                        <!-- <a class="btn btn-success" href="/Users/Show/@user.Id">Conversate</a> -->
                         <form method="post" action="/Users/SendInvitation">
                             <input type="hidden" name="receiverId" value="@user.Id" />
                             <button type="submit" class="btn btn-success">Add Friend</button>
                         </form>
 
+
                        
                     </div>
+            
                 </div>
 
             </div>
         </div>
     }
+
     @if (ViewBag.TotalPages > 0)
     {
-        <div>
+        <div style="margin-top:40px;">
             <nav aria-label="Page navigation example">
                 <ul class="pagination">
                     <li class="page-item">

@@ -1,8 +1,9 @@
-﻿using System.ComponentModel.DataAnnotations;
+﻿using System;
+using System.ComponentModel.DataAnnotations;
+using System.ComponentModel.DataAnnotations.Schema;
 
 namespace AplicatieMDS.Models
 {
-   
     public class Message
     {
         public enum MessageStatus
@@ -31,7 +32,5 @@ namespace AplicatieMDS.Models
         public virtual ApplicationUser? User { get; set; }
 
         public virtual Chat? Chat { get; set; }
-
-
     }
 }

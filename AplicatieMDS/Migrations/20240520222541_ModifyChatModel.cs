@@ -2,9 +2,9 @@
 
 #nullable disable
 
-namespace AplicatieMDS.Data.Migrations
+namespace AplicatieMDS.Migrations
 {
-    public partial class Migrare5 : Migration
+    public partial class ModifyChatModel : Migration
     {
         protected override void Up(MigrationBuilder migrationBuilder)
         {

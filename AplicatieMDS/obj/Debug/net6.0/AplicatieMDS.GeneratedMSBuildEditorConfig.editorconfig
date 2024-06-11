@@ -70,12 +70,24 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVXNlcnNcSW5kZXguY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
+[E:/chat-app/chat-app/AplicatieMDS/Views/Users/Index1.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVXNlcnNcSW5kZXgxLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
 [E:/chat-app/chat-app/AplicatieMDS/Views/Users/Index2.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVXNlcnNcSW5kZXgyLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
+[E:/chat-app/chat-app/AplicatieMDS/Views/Users/ReceivedInvitations.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVXNlcnNcUmVjZWl2ZWRJbnZpdGF0aW9ucy5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
 [E:/chat-app/chat-app/AplicatieMDS/Views/Users/Show.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVXNlcnNcU2hvdy5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[E:/chat-app/chat-app/AplicatieMDS/Views/Users/ShowAllFriends.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcVXNlcnNcU2hvd0FsbEZyaWVuZHMuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
 [E:/chat-app/chat-app/AplicatieMDS/Views/_ViewImports.cshtml]
