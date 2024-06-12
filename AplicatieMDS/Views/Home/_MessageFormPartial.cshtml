@@ -5,13 +5,13 @@
         <div class="card-body">
             <input type="hidden" name="ChatId" value="@Model.ChatId" />
 
-            <label>Continut mesaj</label>
+          
             <br />
-            <textarea class="form-control" name="Content"></textarea>
+            <div style="height:40px; width:100%;margin-bottom:20px">
+            <textarea class="form-control" name="Content" class="rounded-3 w-100 " style="height:60px;border-radius:20px;padding-right:30px;line-height:13px;" ></textarea>
             @Html.ValidationMessage("Content", null, new { @class = "text-danger"})
-
-            <br /><br />
-            <button class="btn btn-success" type="submit">Adauga mesaj</button>
+                <button class="btn " style="position:absolute; bottom:17.5px; right:10px;color:black;font-size:30px;" type="submit">➤</button>
+            </div>
         </div>
     </form>
 </div>

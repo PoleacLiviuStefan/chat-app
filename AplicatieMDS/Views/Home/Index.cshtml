@@ -2,24 +2,22 @@
     ViewData["Title"] = "Home Page";
 }
 
-<div class="text-center">
-    <h1 class="display-4">Bine ați venit!</h1>
-    <h2>Pentru a vă putea accesa conversațiile vă rugăm să vă autentificați!</h2>
-    <h2>În cazul în care nu aveți deja un cont va trebui să vă înregistrați!</h2>
-</div>
-
+<div class="d-flex justify-content-center w-100 ">
 @if (ViewBag.Friends != null && ((IEnumerable<AplicatieMDS.Models.UserFriend>)ViewBag.Friends).Any())
 {
-    <ul class="list-group">
+        <ul class="list-group " style="width:550px;height:700px;background-color:#4E5D6C;">
         @foreach (var friendRelation in (IEnumerable<AplicatieMDS.Models.UserFriend>)ViewBag.Friends)
         {
             var friend = friendRelation.UserId == ViewBag.UserCurent ? friendRelation.Friend : friendRelation.User;
             var chatId = ((IEnumerable<AplicatieMDS.Models.Chat>)ViewBag.Chats).FirstOrDefault(c => (c.CurrentUserId == friend.Id && c.FriendUserId == ViewBag.UserCurent) || (c.FriendUserId == friend.Id && c.CurrentUserId == ViewBag.UserCurent))?.Id;
 
-            <li class="list-group-item">
-                Friend: @friend.UserName
-                <span class="text-muted">Email: @friend.Email</span>
-                <button class="btn btn-success" onclick="loadChatMessages(@chatId)">Afisare chat</button>
+                <li onclick="loadChatMessages(@chatId)" class="d-flex justify-content-between list-group-item" style="cursor:pointer;border-bottom:1px solid #0F2537;">
+                <div class="d-flex align-items-center">
+                    <span style="border-radius:50%; background-color:gray; height:50px; width:50px;"></span>
+                    <span style="margin-left:20px;">@friend.UserName</span>
+                    @{ /* <span class="text-muted">Email: @friend.Email</span>*/ }
+                 </div>
+                @{ /* <button class="btn btn-success" onclick="loadChatMessages(@chatId)">Afisare chat</button> */}
             </li>
         }
     </ul>
@@ -29,7 +27,9 @@ else
     <p>You have no friends added.</p>
 }
 
-<div id="chatMessages">
+    <div class="d-flex flex-column" style="min-width:50%;max-width:50%;height:700px;max-height:screen;background-color:#4E5D6C;">
+
+<div id="chatMessages" class="card" style="height:600px; overflow-x:hidden;">
     <!-- Aici vor fi încărcate mesajele de chat -->
 </div>
 
@@ -37,6 +37,8 @@ else
     <!-- Aici va fi încărcat formularul de trimitere a mesajelor -->
 </div>
 
+    </div>
+</div>
 <div id="editMessageModalContainer"></div>
 
 
@@ -53,6 +55,7 @@ else
                 success: function (data) {
                     $('#chatMessages').html(data);
                     loadMessageForm(chatId); // Încarcă formularul de trimitere a mesajelor
+                    scrollToBottom(); // Derulează automat la încărcarea mesajelor
                 },
                 error: function () {
                     alert('Failed to load chat messages.');
@@ -82,6 +85,7 @@ else
                 success: function (data) {
                     $('#chatMessages').append(data); // Adaugă mesajul nou în lista existentă
                     form.reset(); // Resetează formularul
+                    scrollToBottom(); // Derulează automat la adăugarea unui mesaj nou
                 },
                 error: function () {
                     alert('Failed to send message.');
@@ -115,6 +119,7 @@ else
                     var messageId = $(data).filter('.message').data('message-id');
                     $('#chatMessages .message[data-message-id="' + messageId + '"]').replaceWith(data);
                     $('#editMessageModal').modal('hide');
+                    scrollToBottom(); // Derulează automat la editarea unui mesaj
                 },
                 error: function () {
                     alert('Failed to save message.');
@@ -136,6 +141,11 @@ else
                     }
                 });
             }
+        }
+
+        function scrollToBottom() {
+            var chatMessages = document.getElementById('chatMessages');
+            chatMessages.scrollTop = chatMessages.scrollHeight;
         }
     </script>
 }

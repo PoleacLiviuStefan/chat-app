@@ -22,6 +22,8 @@ namespace AplicatieMDS.Models
         public virtual ICollection<Chat> ChatsCreated { get; set; } = new List<Chat>();
         public virtual ICollection<Chat> ChatsParticipated { get; set; } = new List<Chat>();
 
+        [NotMapped]
+        public string RoleId { get; set; }
         // Variable to hold existing roles in the database for populating a dropdown list
         [NotMapped]
         public IEnumerable<SelectListItem>? AllRoles { get; set; }
