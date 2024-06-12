@@ -5,6 +5,8 @@ using Microsoft.AspNetCore.Identity;
 using Microsoft.AspNetCore.Mvc;
 using Microsoft.AspNetCore.Mvc.Rendering;
 using Microsoft.EntityFrameworkCore;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace AplicatieMDS.Controllers
 {
@@ -81,7 +83,7 @@ namespace AplicatieMDS.Controllers
 
         public async Task<ActionResult> Edit(string id)
         {
-            ApplicationUser user = await db.Users.FindAsync(id);
+            ApplicationUser user = await _userManager.FindByIdAsync(id);
             user.AllRoles = GetAllRoles();
             var roleNames = await _userManager.GetRolesAsync(user);
             var currentUserRole = _roleManager.Roles
@@ -97,7 +99,7 @@ namespace AplicatieMDS.Controllers
         [HttpPost]
         public async Task<ActionResult> Edit(string id, ApplicationUser newData, [FromForm] string newRole)
         {
-            ApplicationUser user = await db.Users.FindAsync(id);
+            ApplicationUser user = await _userManager.FindByIdAsync(id);
             user.AllRoles = GetAllRoles();
 
             if (ModelState.IsValid)
@@ -108,40 +110,81 @@ namespace AplicatieMDS.Controllers
                 user.LastName = newData.LastName;
                 user.PhoneNumber = newData.PhoneNumber;
 
-                var roles = db.Roles.ToList();
-                foreach (var role in roles)
+                // Remove all existing roles
+                var currentRoles = await _userManager.GetRolesAsync(user);
+                foreach (var role in currentRoles)
                 {
-                    await _userManager.RemoveFromRoleAsync(user, role.Name);
+                    await _userManager.RemoveFromRoleAsync(user, role);
                 }
 
+                // Add the new role
                 var roleName = await _roleManager.FindByIdAsync(newRole);
-                await _userManager.AddToRoleAsync(user, roleName.ToString());
+                if (roleName != null)
+                {
+                    await _userManager.AddToRoleAsync(user, roleName.Name);
+                }
 
-                db.SaveChanges();
+                var result = await _userManager.UpdateAsync(user);
+                if (result.Succeeded)
+                {
+                    return RedirectToAction("Index");
+                }
+                foreach (var error in result.Errors)
+                {
+                    ModelState.AddModelError(string.Empty, error.Description);
+                }
             }
-            return RedirectToAction("Index");
+
+            var roles = GetAllRoles();
+            ViewBag.Roles = new SelectList(roles, "Value", "Text");
+            var roleNames = await _userManager.GetRolesAsync(user);
+            var currentUserRole = _roleManager.Roles
+                                              .Where(r => roleNames.Contains(r.Name))
+                                              .Select(r => r.Id)
+                                              .FirstOrDefault();
+
+            ViewBag.UserRole = currentUserRole;
+            return View(user);
         }
+
+ 
+
+
+
+
+
 
         [HttpPost]
         public async Task<IActionResult> Delete(string id)
         {
-            var user = await db.Users
-                               .Include(u => u.ChatUsers)
-                               .Include(u => u.Messages)
-                               .FirstOrDefaultAsync(u => u.Id == id);
-
-            if (user.Messages.Any())
+            var user = await _userManager.FindByIdAsync(id);
+            if (user == null)
             {
-                db.Messages.RemoveRange(user.Messages);
+                return NotFound();
             }
 
-            if (user.ChatUsers.Any())
-            {
-                db.ChatUsers.RemoveRange(user.ChatUsers);
-            }
+            // Remove friend invitations
+            var friendInvitations = db.FriendInvitations.Where(fi => fi.ReceiverId == id || fi.SenderId == id);
+            db.FriendInvitations.RemoveRange(friendInvitations);
 
-            db.Users.Remove(user);
-            db.SaveChanges();
+            // Remove user friends
+            var userFriends = db.UserFriends.Where(uf => uf.UserId == id || uf.FriendId == id);
+            db.UserFriends.RemoveRange(userFriends);
+
+            // Remove chat users
+            var chatUsers = db.ChatUsers.Where(cu => cu.UserId == id);
+            db.ChatUsers.RemoveRange(chatUsers);
+
+            // Save changes before removing the user
+            await db.SaveChangesAsync();
+
+            // Delete user
+            var result = await _userManager.DeleteAsync(user);
+            if (!result.Succeeded)
+            {
+                // Handle error
+                return BadRequest(result.Errors);
+            }
 
             return RedirectToAction("Index");
         }
@@ -196,7 +239,7 @@ namespace AplicatieMDS.Controllers
 
             var invitations = await db.FriendInvitations
                                       .Include(fi => fi.Sender)
-                                      .Where(fi => fi.ReceiverId == userId && fi.Accepted==null)
+                                      .Where(fi => fi.ReceiverId == userId && fi.Accepted == null)
                                       .ToListAsync();
 
             return View(invitations);
@@ -275,24 +318,20 @@ namespace AplicatieMDS.Controllers
             return View(friends);
         }
 
-
-        [NonAction]
-        public IEnumerable<SelectListItem> GetAllRoles()
+        private List<SelectListItem> GetAllRoles()
         {
-            var selectList = new List<SelectListItem>();
-
-            var roles = from role in db.Roles
-                        select role;
-
+            var roles = _roleManager.Roles.ToList();
+            var roleList = new List<SelectListItem>();
             foreach (var role in roles)
             {
-                selectList.Add(new SelectListItem
+                roleList.Add(new SelectListItem
                 {
-                    Value = role.Id.ToString(),
-                    Text = role.Name.ToString()
+                    Value = role.Id,
+                    Text = role.Name
                 });
             }
-            return selectList;
+            return roleList;
         }
+
     }
 }

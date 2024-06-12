@@ -66,7 +66,8 @@ namespace AplicatieMDS.Controllers
                 return NotFound();
             }
 
-            return PartialView("_MessagesPartial", chat.Messages);
+                ViewBag.CurrentUserId = _userManager.GetUserId(User); // Transmiterea CurrentUserId prin ViewBag
+    return PartialView("_MessagesPartial", chat.Messages);
         }
 
 
@@ -97,11 +98,13 @@ namespace AplicatieMDS.Controllers
                     .Include(m => m.User)
                     .FirstOrDefaultAsync(m => m.Id == message.Id);
 
+                ViewBag.CurrentUserId = _userManager.GetUserId(User); // Transmiterea CurrentUserId prin ViewBag
                 return PartialView("_SingleMessagePartial", newMessage);
             }
 
             return BadRequest("Invalid message");
         }
+
 
         [HttpGet]
         [Authorize(Roles = "User,Moderator,Admin")]
@@ -116,29 +119,31 @@ namespace AplicatieMDS.Controllers
         }
 
 
-        [HttpPost]
-        [Authorize(Roles = "User,Moderator,Admin")]
-        public async Task<IActionResult> EditMessage(Message message)
+[HttpPost]
+[Authorize(Roles = "User,Moderator,Admin")]
+public async Task<IActionResult> EditMessage(Message message)
+{
+    if (ModelState.IsValid)
+    {
+        var existingMessage = await db.Messages
+            .Include(m => m.User)
+            .FirstOrDefaultAsync(m => m.Id == message.Id);
+        
+        if (existingMessage == null)
         {
-            if (ModelState.IsValid)
-            {
-                var existingMessage = await db.Messages
-                    .Include(m => m.User)
-                    .FirstOrDefaultAsync(m => m.Id == message.Id);
-
-                if (existingMessage == null)
-                {
-                    return NotFound();
-                }
-
-                existingMessage.Content = message.Content;
-                db.Messages.Update(existingMessage);
-                await db.SaveChangesAsync();
-
-                return PartialView("_SingleMessagePartial", existingMessage);
-            }
-            return BadRequest("Invalid message");
+            return NotFound();
         }
+
+        existingMessage.Content = message.Content;
+        db.Messages.Update(existingMessage);
+        await db.SaveChangesAsync();
+
+        ViewBag.CurrentUserId = _userManager.GetUserId(User); // Transmiterea CurrentUserId prin ViewBag
+        return PartialView("_SingleMessagePartial", existingMessage);
+    }
+    return BadRequest("Invalid message");
+}
+
 
 
 

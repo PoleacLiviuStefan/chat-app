@@ -1,15 +1,21 @@
 ﻿@model AplicatieMDS.Models.Message
 
-<div class="container message" data-message-id="@Model.Id">
-    <div class="row">
-        <div class="col-md-2"></div>
+@{
+    var currentUserId = ViewBag.CurrentUserId as string;
+    var isCurrentUser = Model.UserId == currentUserId;
+    var alignmentClass = isCurrentUser ? "text-end justify-content-end" : "text-start";
+    var messageClass = isCurrentUser ? "bg-primary text-white align-self-end" : "bg-light text-dark align-self-start"; // Aliniază mesajele la dreapta sau la stânga
+}
 
-        <div class="col-md-8">
-            <div>
-                <strong><i class="bi bi-person"></i> @(Model.User?.UserName ?? "Unknown User")</strong>
-                <small>@Model.Date.ToString("g")</small> <!-- Formatul general pentru afișarea datei și orei -->
-
-                <p>
+<div class="container message my-2" style="min-width:100%;" data-message-id="@Model.Id">
+    <div class="row" style="min-width:100%;">
+        <div class="d-flex flex-column @(alignmentClass)" style="max-width: 100%;">
+            <div class="d-flex flex-column max-width:50%;">
+                <div class="d-flex @(alignmentClass) align-items-center w-100">
+                    <strong><i class="bi bi-person"></i> @(Model.User?.UserName ?? "Unknown User")</strong>
+                    <small class="" style="margin-left:5px;">@Model.Date.ToString("g")</small> <!-- Formatul general pentru afișarea datei și orei -->
+                </div>
+                <p class="p-2 @(messageClass)" style="max-width:50%; border-radius: 10px;">
                     @using System.Text.RegularExpressions
                     @{
                         var content = Model.Content ?? string.Empty;
@@ -31,18 +37,17 @@
                 </p>
             </div>
 
-            <div class="d-flex">
-                <div>
-                    <button type="button" class="btn btn-outline-primary" onclick="openEditModal(@Model.Id)"><i class="bi bi-pencil-square"></i> Edit</button>
+            @if (isCurrentUser)
+            {
+                <div class="d-flex justify-content-end">
+                    <div>
+                        <button type="button" class="btn btn-outline-primary" onclick="openEditModal(@Model.Id)"><i class="bi bi-pencil-square"></i> Edit</button>
+                    </div>
+                    <div>
+                        <button type="button" class="btn btn-outline-danger" onclick="deleteMessage(@Model.Id)"><i class="bi bi-trash"></i> Sterge</button>
+                    </div>
                 </div>
-                <div>
-                    <button type="button" class="btn btn-outline-danger" onclick="deleteMessage(@Model.Id)"><i class="bi bi-trash"></i> Sterge</button>
-                </div>
-            </div>
-
-            <br />
+            }
         </div>
-
-        <div class="col-md-2"></div>
     </div>
 </div>
