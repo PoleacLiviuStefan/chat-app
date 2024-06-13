@@ -1,0 +1,48 @@
+﻿@model IEnumerable<GEmojiSharp.Emoji>
+
+<div id="emojiPicker" class="emoji-picker" style="display: none;">
+    @foreach (var emoji in Model)
+    {
+        <button type="button" class="emoji-button" data-unicode="@emoji.Character">@emoji.Character</button>
+    }
+</div>
+
+<style>
+    .emoji-picker {
+        display: flex;
+        flex-wrap: wrap;
+        max-width: 300px;
+        padding: 10px;
+        border: 1px solid #ccc;
+        background-color: white;
+    }
+
+    .emoji-button {
+        border: none;
+        background: none;
+        font-size: 20px;
+        margin: 5px;
+        cursor: pointer;
+    }
+</style>
+
+<script>
+    document.addEventListener('DOMContentLoaded', (event) => {
+        const emojiPicker = document.getElementById('emojiPicker');
+        const emojiButtons = emojiPicker.querySelectorAll('.emoji-button');
+
+        emojiButtons.forEach(button => {
+            button.addEventListener('click', () => {
+                const unicode = button.getAttribute('data-unicode');
+                const textArea = document.querySelector('#messageInput');
+                textArea.value += unicode;
+                emojiPicker.style.display = 'none';
+            });
+        });
+    });
+
+    function toggleEmojiPicker() {
+        const emojiPicker = document.getElementById('emojiPicker');
+        emojiPicker.style.display = emojiPicker.style.display === 'none' ? 'block' : 'none';
+    }
+</script>

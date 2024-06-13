@@ -1,52 +1,81 @@
 ﻿@{
     ViewData["Title"] = "Home Page";
+    var searchTerm = Context.Request.Query["searchTerm"].ToString();
+    var filteredFriends = ((IEnumerable<AplicatieMDS.Models.UserFriend>)ViewBag.Friends)
+        .Where(uf => (uf.UserId == ViewBag.UserCurent ? uf.Friend.UserName : uf.User.UserName)
+        .Contains(searchTerm, StringComparison.OrdinalIgnoreCase));
 }
 
-<div class="d-flex justify-content-center w-100 ">
-@if (ViewBag.Friends != null && ((IEnumerable<AplicatieMDS.Models.UserFriend>)ViewBag.Friends).Any())
-{
-        <ul class="list-group " style="width:550px;height:700px;background-color:#4E5D6C;">
-        @foreach (var friendRelation in (IEnumerable<AplicatieMDS.Models.UserFriend>)ViewBag.Friends)
+<div class="d-flex justify-content-center w-100">
+    <div style="width:550px;height:700px;background-color:#4E5D6C;">
+        <!-- Search bar -->
+        <form method="get" action="@Url.Action("Index", "Home")" class="p-3" id="searchForm">
+            <span class="relative" style="position:relative;">
+                <img src="~/Images/search.svg" alt="Avatar" width="30px" height="30px" style="position:absolute;right:10px;top:3px;opacity:50%; margin-left:3px;color:gray;" />
+                <input type="text" name="searchTerm" class="form-control" placeholder="Search friends..." style="padding-left:10px;padding-right:40px;border-radius:20px;" value="@searchTerm" onkeydown="if(event.key === 'Enter') this.form.submit();" />
+            </span>
+        </form>
+
+        @if (filteredFriends.Any())
         {
-            var friend = friendRelation.UserId == ViewBag.UserCurent ? friendRelation.Friend : friendRelation.User;
-            var chatId = ((IEnumerable<AplicatieMDS.Models.Chat>)ViewBag.Chats).FirstOrDefault(c => (c.CurrentUserId == friend.Id && c.FriendUserId == ViewBag.UserCurent) || (c.FriendUserId == friend.Id && c.CurrentUserId == ViewBag.UserCurent))?.Id;
+            <ul class="list-group">
+                @foreach (var friendRelation in filteredFriends)
+                {
+                    var friend = friendRelation.UserId == ViewBag.UserCurent ? friendRelation.Friend : friendRelation.User;
+                    var chatId = ((IEnumerable<AplicatieMDS.Models.Chat>)ViewBag.Chats).FirstOrDefault(c => (c.CurrentUserId == friend.Id && c.FriendUserId == ViewBag.UserCurent) || (c.FriendUserId == friend.Id && c.CurrentUserId == ViewBag.UserCurent))?.Id;
+                    var lastMessage = chatId.HasValue && ViewBag.LastMessages.ContainsKey(chatId.Value) ? ViewBag.LastMessages[chatId.Value] : null;
 
-                <li onclick="loadChatMessages(@chatId)" class="d-flex justify-content-between list-group-item" style="cursor:pointer;border-bottom:1px solid #0F2537;">
-                <div class="d-flex align-items-center">
-                    <span style="border-radius:50%; background-color:gray; height:50px; width:50px;"></span>
-                    <span style="margin-left:20px;">@friend.UserName</span>
-                    @{ /* <span class="text-muted">Email: @friend.Email</span>*/ }
-                 </div>
-                @{ /* <button class="btn btn-success" onclick="loadChatMessages(@chatId)">Afisare chat</button> */}
-            </li>
+                    <li onclick="loadChatMessages(@chatId)" class="d-flex justify-content-between list-group-item" style="cursor:pointer;border-bottom:1px solid #0F2537;">
+                        <div class="d-flex align-items-center w-100">
+                            <span class="d-flex justify-content-center align-items-center" style="border-radius:50%; background-color:white; height:50px; width:50px; overflow:hidden">
+                                <img src="~/Images/user.svg" alt="Avatar" width="50px" height="50px" />
+                            </span>
+                            <div class="d-flex justify-content-between w-100">
+                                <div style="margin-left:20px;" class="d-flex flex-column">
+                            <span >@friend.UserName</span>
+                                @if (lastMessage != null)
+                                {
+                                    <p >@(lastMessage.Content.Length > 20 ? lastMessage.Content.Substring(0, 20) + "..." : lastMessage.Content)</p>
+
+                                }
+                                </div>
+                            <small class="text-muted">@lastMessage.Date.ToString("g")</small>
+                            </div>
+                        </div>
+                        <div>
+                           
+                        </div>
+                    </li>
+                }
+            </ul>
         }
-    </ul>
-}
-else
-{
-    <p>You have no friends added.</p>
-}
+        else
+        {
+            <p>You have no friends added.</p>
+        }
+    </div>
 
     <div class="d-flex flex-column" style="min-width:50%;max-width:50%;height:700px;max-height:screen;background-color:#4E5D6C;">
+        <div id="chatMessages" class="card" style="height:600px; overflow-x:hidden;">
+            <!-- Aici vor fi încărcate mesajele de chat -->
+        </div>
 
-<div id="chatMessages" class="card" style="height:600px; overflow-x:hidden;">
-    <!-- Aici vor fi încărcate mesajele de chat -->
-</div>
-
-<div id="messageForm">
-    <!-- Aici va fi încărcat formularul de trimitere a mesajelor -->
-</div>
-
+        <div id="messageForm">
+            <!-- Aici va fi încărcat formularul de trimitere a mesajelor -->
+        </div>
     </div>
 </div>
+
 <div id="editMessageModalContainer"></div>
-
-
-
-
 
 @section Scripts {
     <script>
+        $(document).ready(function () {
+            $("#messageInput").emojioneArea({
+                pickerPosition: "bottom"
+            });
+        });
+
         function loadChatMessages(chatId) {
             $.ajax({
                 url: '@Url.Action("GetChatMessages", "Home")',
@@ -70,6 +99,19 @@ else
                 data: { chatId: chatId },
                 success: function (data) {
                     $('#messageForm').html(data);
+                    const emojiPicker = document.querySelector("#emojiPicker");
+                    const emojiButton = document.querySelector("#emojiButton");
+                    const messageInput = document.querySelector("#messageInput");
+
+                    emojiButton.addEventListener("click", function () {
+                        emojiPicker.style.display = emojiPicker.style.display === "none" ? "block" : "none";
+                    });
+
+                    emojiPicker.addEventListener("emoji-click", function (event) {
+                        const emoji = event.detail.unicode;
+                        messageInput.value += emoji;
+                        emojiPicker.style.display = "none";
+                    });
                 },
                 error: function () {
                     alert('Failed to load message form.');
@@ -149,8 +191,3 @@ else
         }
     </script>
 }
-
-
-
-
-

@@ -22,6 +22,10 @@ build_property._RazorSourceGeneratorDebug =
 build_metadata.AdditionalFiles.TargetPath = QXJlYXNcSWRlbnRpdHlcUGFnZXNcX1ZpZXdTdGFydC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
+[E:/chat-app/chat-app/AplicatieMDS/Components/Default.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Q29tcG9uZW50c1xEZWZhdWx0LmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
 [E:/chat-app/chat-app/AplicatieMDS/Views/Chats/Index.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQ2hhdHNcSW5kZXguY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 

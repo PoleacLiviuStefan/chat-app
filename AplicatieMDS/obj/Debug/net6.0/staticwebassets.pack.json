@@ -5,6 +5,26 @@
       "PackagePath": "staticwebassets\\AplicatieMDS.bundle.scp.css"
     },
     {
+      "Id": "E:\\chat-app\\chat-app\\AplicatieMDS\\wwwroot\\Images\\logo.png",
+      "PackagePath": "staticwebassets\\Images\\logo.png"
+    },
+    {
+      "Id": "E:\\chat-app\\chat-app\\AplicatieMDS\\wwwroot\\Images\\search.svg",
+      "PackagePath": "staticwebassets\\Images\\search.svg"
+    },
+    {
+      "Id": "E:\\chat-app\\chat-app\\AplicatieMDS\\wwwroot\\Images\\user.svg",
+      "PackagePath": "staticwebassets\\Images\\user.svg"
+    },
+    {
+      "Id": "E:\\chat-app\\chat-app\\AplicatieMDS\\wwwroot\\css\\css.css",
+      "PackagePath": "staticwebassets\\css\\css.css"
+    },
+    {
+      "Id": "E:\\chat-app\\chat-app\\AplicatieMDS\\wwwroot\\css\\emoji-picker.css",
+      "PackagePath": "staticwebassets\\css\\emoji-picker.css"
+    },
+    {
       "Id": "E:\\chat-app\\chat-app\\AplicatieMDS\\wwwroot\\css\\mycsstheme.css",
       "PackagePath": "staticwebassets\\css\\mycsstheme.css"
     },

@@ -1,0 +1,17 @@
+﻿/* wwwroot/css/emoji-picker.css */
+.emoji-picker {
+    display: none;
+    position: absolute;
+    bottom: 80px;
+    right: 50px;
+    background-color: white;
+    border: 1px solid #ccc;
+    padding: 10px;
+    border-radius: 10px;
+}
+
+.emoji {
+    cursor: pointer;
+    font-size: 20px;
+    margin: 5px;
+}

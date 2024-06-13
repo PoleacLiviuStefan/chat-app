@@ -474,3 +474,4 @@ E:\chat-app\chat-app\AplicatieMDS\bin\Debug\net6.0\ru\Microsoft.CodeAnalysis.CSh
 E:\chat-app\chat-app\AplicatieMDS\bin\Debug\net6.0\tr\Microsoft.CodeAnalysis.CSharp.resources.dll
 E:\chat-app\chat-app\AplicatieMDS\bin\Debug\net6.0\zh-Hans\Microsoft.CodeAnalysis.CSharp.resources.dll
 E:\chat-app\chat-app\AplicatieMDS\bin\Debug\net6.0\zh-Hant\Microsoft.CodeAnalysis.CSharp.resources.dll
+E:\chat-app\chat-app\AplicatieMDS\bin\Debug\net6.0\GEmojiSharp.dll

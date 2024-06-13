@@ -1,0 +1,22 @@
+﻿/* wwwroot/css/emoji-picker.css */
+.emoji-picker {
+    display: none;
+    position: absolute;
+    bottom: 80px;
+    right: 50px;
+    background-color: white;
+    border: 1px solid #ccc;
+    padding: 10px;
+    border-radius: 10px;
+    max-width: 300px;
+    max-height: 200px;
+    overflow-y: auto;
+    z-index: 1000; /* Make sure it appears above other elements */
+}
+
+.emoji {
+    cursor: pointer;
+    font-size: 20px;
+    margin: 5px;
+    display: inline-block;
+}

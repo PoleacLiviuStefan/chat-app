@@ -39,18 +39,26 @@ namespace AplicatieMDS.Controllers
                 .Select(uf => uf.UserId == userId ? uf.FriendId : uf.UserId)
                 .ToList();
 
-            // Load chats
+            // Load chats and last messages
             var chats = await db.Chats
+                .Include(c => c.Messages.OrderByDescending(m => m.Date).Take(1))
                 .Where(c => (friendIds.Contains(c.CurrentUserId) && c.FriendUserId == userId) ||
                             (friendIds.Contains(c.FriendUserId) && c.CurrentUserId == userId))
                 .ToListAsync();
 
+            var lastMessages = chats.ToDictionary(
+                chat => chat.Id,
+                chat => chat.Messages.OrderByDescending(m => m.Date).FirstOrDefault()
+            );
+
             ViewBag.UserCurent = userId;
             ViewBag.Friends = friends;
             ViewBag.Chats = chats;
+            ViewBag.LastMessages = lastMessages;
 
             return View();
         }
+
 
         [HttpGet]
         [Authorize(Roles = "User,Moderator,Admin")]
@@ -162,6 +170,43 @@ public async Task<IActionResult> EditMessage(Message message)
         }
 
 
+        public async Task<IActionResult> Search()
+        {
+            var userId = _userManager.GetUserId(User);
+            if (string.IsNullOrEmpty(userId))
+            {
+                return Redirect("/Identity/Account/Login");
+            }
+
+            var searchTerm = HttpContext.Request.Query["searchTerm"].ToString();
+
+            // Get the current user's friends
+            var friends = await db.UserFriends
+                .Include(uf => uf.User)
+                .Include(uf => uf.Friend)
+                .Where(uf => uf.UserId == userId || uf.FriendId == userId)
+                .ToListAsync();
+
+            var friendIds = friends
+                .Select(uf => uf.UserId == userId ? uf.FriendId : uf.UserId)
+                .ToList();
+
+            // Get users who are friends of the current user
+            IQueryable<ApplicationUser> friendUsers = db.Users
+                .Where(u => friendIds.Contains(u.Id))
+                .OrderBy(u => u.UserName);
+
+            if (!string.IsNullOrEmpty(searchTerm))
+            {
+                friendUsers = friendUsers.Where(user => user.UserName.Contains(searchTerm));
+            }
+
+            var allUsers = await friendUsers.ToListAsync();
+
+            ViewBag.UsersList = allUsers;
+
+            return View();
+        }
 
 
 

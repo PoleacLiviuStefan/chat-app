@@ -34,6 +34,7 @@
     ".NETCoreApp,Version=v6.0": {
       "AplicatieMDS/1.0.0": {
         "dependencies": {
+          "GEmojiSharp": "3.1.0",
           "Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore": "6.0.25",
           "Microsoft.AspNetCore.Identity.EntityFrameworkCore": "6.0.25",
           "Microsoft.AspNetCore.Identity.UI": "6.0.25",
@@ -334,6 +335,17 @@
         },
         "compile": {
           "AplicatieMDS.dll": {}
+        }
+      },
+      "GEmojiSharp/3.1.0": {
+        "runtime": {
+          "lib/netstandard2.0/GEmojiSharp.dll": {
+            "assemblyVersion": "3.1.0.0",
+            "fileVersion": "3.1.0.0"
+          }
+        },
+        "compile": {
+          "lib/netstandard2.0/GEmojiSharp.dll": {}
         }
       },
       "Humanizer.Core/2.8.26": {
@@ -2846,6 +2858,13 @@
       "type": "project",
       "serviceable": false,
       "sha512": ""
+    },
+    "GEmojiSharp/3.1.0": {
+      "type": "package",
+      "serviceable": true,
+      "sha512": "sha512-qE7QXrV4GKZyn7l5aUpk02hSCabKlVVSL1bMKFlnBE5cgvDAKTg60ujcEocMVwVeYhKJKOSQldAAcDKDc6Up0A==",
+      "path": "gemojisharp/3.1.0",
+      "hashPath": "gemojisharp.3.1.0.nupkg.sha512"
     },
     "Humanizer.Core/2.8.26": {
       "type": "package",

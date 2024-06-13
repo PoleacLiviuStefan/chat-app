@@ -2,6 +2,19 @@
   "version": 3,
   "targets": {
     "net6.0": {
+      "GEmojiSharp/3.1.0": {
+        "type": "package",
+        "compile": {
+          "lib/netstandard2.0/GEmojiSharp.dll": {
+            "related": ".pdb;.xml"
+          }
+        },
+        "runtime": {
+          "lib/netstandard2.0/GEmojiSharp.dll": {
+            "related": ".pdb;.xml"
+          }
+        }
+      },
       "Humanizer.Core/2.8.26": {
         "type": "package",
         "compile": {
@@ -1246,6 +1259,22 @@
     }
   },
   "libraries": {
+    "GEmojiSharp/3.1.0": {
+      "sha512": "qE7QXrV4GKZyn7l5aUpk02hSCabKlVVSL1bMKFlnBE5cgvDAKTg60ujcEocMVwVeYhKJKOSQldAAcDKDc6Up0A==",
+      "type": "package",
+      "path": "gemojisharp/3.1.0",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "GEmojiSharp.md",
+        "gemojisharp.3.1.0.nupkg.sha512",
+        "gemojisharp.nuspec",
+        "icon.png",
+        "lib/netstandard2.0/GEmojiSharp.dll",
+        "lib/netstandard2.0/GEmojiSharp.pdb",
+        "lib/netstandard2.0/GEmojiSharp.xml"
+      ]
+    },
     "Humanizer.Core/2.8.26": {
       "sha512": "OiKusGL20vby4uDEswj2IgkdchC1yQ6rwbIkZDVBPIR6al2b7n3pC91elBul9q33KaBgRKhbZH3+2Ur4fnWx2A==",
       "type": "package",
@@ -3211,6 +3240,7 @@
   },
   "projectFileDependencyGroups": {
     "net6.0": [
+      "GEmojiSharp >= 3.1.0",
       "Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore >= 6.0.25",
       "Microsoft.AspNetCore.Identity.EntityFrameworkCore >= 6.0.25",
       "Microsoft.AspNetCore.Identity.UI >= 6.0.25",
@@ -3261,6 +3291,10 @@
       "net6.0": {
         "targetAlias": "net6.0",
         "dependencies": {
+          "GEmojiSharp": {
+            "target": "Package",
+            "version": "[3.1.0, )"
+          },
           "Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore": {
             "target": "Package",
             "version": "[6.0.25, )"
