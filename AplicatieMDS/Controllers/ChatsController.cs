@@ -112,10 +112,10 @@ namespace AplicatieMDS.Controllers
                 .FirstOrDefaultAsync(c => (c.CurrentUserId == currentUserId && c.FriendUserId == friendId) ||
                                           (c.CurrentUserId == friendId && c.FriendUserId == currentUserId));
 
+            // Return success with a message if the chat already exists
             if (existingChat != null)
             {
-                // Chat already exists, load messages
-                return PartialView("_MessagesPartial", existingChat.Messages);
+                return Json(new { success = true, message = "A chat already exists with this friend", chatId = existingChat.Id });
             }
 
             // Create a new chat if it doesn't exist
@@ -125,29 +125,24 @@ namespace AplicatieMDS.Controllers
                 FriendUserId = friendId
             };
 
-            if (ModelState.IsValid)
+            db.Chats.Add(chat);
+            await db.SaveChangesAsync();
+
+            var chatUser = new ChatUser
             {
-                db.Chats.Add(chat);
-                await db.SaveChangesAsync();
+                ChatId = chat.Id,
+                UserId = chat.CurrentUserId
+            };
 
-                var chatUser = new ChatUser
-                {
-                    ChatId = chat.Id,
-                    UserId = chat.CurrentUserId
-                };
+            db.ChatUsers.Add(chatUser);
+            await db.SaveChangesAsync();
 
-                db.ChatUsers.Add(chatUser);
-                await db.SaveChangesAsync();
-
-                TempData["message"] = "The chat has been created";
-                TempData["messageType"] = "alert-success";
-                return PartialView("_MessagesPartial", chat.Messages);
-            }
-
-            TempData["message"] = "Failed to create the chat";
-            TempData["messageType"] = "alert-danger";
-            return RedirectToAction("ShowAllFriends", "Users");
+            return Json(new { success = true, message = "The chat has been created", chatId = chat.Id });
         }
+
+
+
+
 
         private void SetAccessRights()
         {

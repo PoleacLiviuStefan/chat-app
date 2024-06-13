@@ -1,119 +1,44 @@
-﻿@model AplicatieMDS.Models.Chat
+﻿@model AplicatieMDS.Models.ApplicationUser
 
-@* Afisarea unui chat*@
 
-@if (TempData["message"] != null)
-{
-    <div class="alert @ViewBag.Alert p-3 rounded-3 text-center mb-5">
-        @ViewBag.Message
-    </div>
-}
+<div class="card mt-3" style="height:100%; width: 100%;">
 
-<br />
+    <div class="card-body d-flex justify-content-between flex-column">
+        <div>
+            <p><i class="bi bi-person"> </i> UserName: @Model.UserName</p>
 
-<div class="row">
-    <div class="card col-sm-9">
-        <div class="card-body">
-            <div><i class="bi bi-person"></i> @Model.CurrentUser.UserName</div>
-            <div><i class="bi bi-person"></i> @Model.FriendUser.UserName</div>
+            <p><i class="bi bi-envelope"></i> Email utilizator: @Model.Email</p>
+
+            @if (ViewBag.Roles.Count > 0)
+            {
+                <p><i class="bi bi-person"> </i> Roluri utilizator:</p>
+                @foreach (var role in ViewBag.Roles)
+                {
+                    <span class="rounded-pill bg-dark mr-2 px-4 py-2 text-white">@role</span>
+                }
+            }
+
+
+
         </div>
 
-        @if (Model.CurrentUserId == ViewBag.UserCurent || ViewBag.EsteModerator || ViewBag.EsteAdmin || Model.FriendUserId == ViewBag.UserCurent)
-        {
-            <div class="d-flex flex-row justify-content-between p-3 border-1 border-top">
-                <form method="post" action="/Chats/Delete/@Model.Id">
-                    <button class="btn btn-danger" type="submit">Sterge chat</button>
-                </form>
-            </div>
-        }
+        <div class="d-flex flex-row justify-content-between p-3">
 
-        <br />
-        <br />
+            @if ((string)Model.Id != ViewBag.UserCurent)
+            {
+                @using (Html.BeginForm(actionName: "Delete", controllerName: "Users", method: FormMethod.Post, routeValues: new { id = @Model.Id }))
+                {
 
-        @* Afisare mesaje impreuna cu butoanele de editare si stergere *@
+                    <button class="btn btn-danger" type="submit">Sterge utilizator</button>
 
-        @foreach (var mess in Model.Messages)
-        {
-            <div class="container">
-                <div class="row">
-                    <div class="col-md-2"></div>
-
-                    <div class="col-md-8">
-                        <div>
-                            <strong><i class="bi bi-person"></i>@mess.User.UserName</strong>
-                            <small>@mess.Date</small>
-
-                            <p>
-                                @using System.Text.RegularExpressions
-                                @{
-                                    var content = mess.Content;
-                                }
-
-                                @if (content.Contains(".jpeg") || content.Contains(".jpg") || content.Contains(".gif") || content.Contains(".png") || content.Contains(".JPG"))
-                                {
-                                    <img src="@content" alt="Imagine încorporată" class="img-fluid">
-                                }
-                                else if (content.Contains("youtube.com") || content.Contains("youtu.be"))
-                                {
-                                    var videoId = Regex.Match(content, @"(?:https?:\/\/)?(?:www\.)?(?:youtube\.com\/(?:[^\/\n\s]+\/\S+\/|(?:v|e(?:mbed)?)\/|\S*?[?&]v=)|youtu\.be\/)([a-zA-Z0-9_-]{11})").Groups[1].Value;
-                                    <iframe width='560' height='315' src='https://www.youtube.com/embed/@videoId' frameborder='0' allowfullscreen></iframe>
-                                }
-                                else
-                                {
-                                    @Html.Raw(content)
-                                }
-                            </p>
-                        </div>
-
-                        @if (mess.UserId == ViewBag.UserCurent || ViewBag.EsteModerator || ViewBag.EsteAdmin || Model.CurrentUserId == ViewBag.UserCurent || Model.FriendUserId == ViewBag.UserCurent)
-                        {
-                            <div class="d-flex">
-                                <div>
-                                    <a class="btn btn-outline-primary" href="@Url.Action("Edit", "Messages", new { id = mess.Id, chatId = Model.Id })"><i class="bi bi-pencil-square"></i> </a>
-                                </div>
-                                <div>
-                                    <form method="post" action="/Messages/Delete/@mess.Id">
-                                        <button class="btn btn-outline-danger" type="submit"><i class="bi bi-trash"></i>Sterge</button>
-                                    </form>
-                                </div>
-                            </div>
-                        }
-
-                        <br />
-                    </div>
-
-                    <div class="col-md-2"></div>
-                </div>
-            </div>
-        }
-
-        @* Afisarea formularului in care se poate adauga un mesaj *@
-
-        <div class="container">
-            <div class="row">
-                <div class="col-md-2"></div>
-
-                <div class="col-md-8">
-                    <div class="card">
-                        <form method="post" action="/Chats/Show/@Model.Id">
-                            <div class="card-body">
-                                <input type="hidden" name="ChatId" value="@Model.Id" />
-
-                                <label>Continut mesaj</label>
-                                <br />
-                                <textarea class="form-control" name="Content"></textarea>
-                                @Html.ValidationMessage("Content", null, new { @class = "text-danger"})
-
-                                <br /><br />
-                                <button class="btn btn-success" type="submit">Adauga mesaj</button>
-                            </div>
-                        </form>
-                    </div>
-                    <br /><br />
-                </div>
-
-                <div class="col-md-2"></div>
-            </div>
+                }
+            }
         </div>
     </div>
 </div>
+
+
+
+
+
+
