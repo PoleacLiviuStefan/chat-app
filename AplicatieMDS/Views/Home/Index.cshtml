@@ -11,9 +11,9 @@
             var friend = friendRelation.UserId == ViewBag.UserCurent ? friendRelation.Friend : friendRelation.User;
             var chatId = ((IEnumerable<AplicatieMDS.Models.Chat>)ViewBag.Chats).FirstOrDefault(c => (c.CurrentUserId == friend.Id && c.FriendUserId == ViewBag.UserCurent) || (c.FriendUserId == friend.Id && c.CurrentUserId == ViewBag.UserCurent))?.Id;
 
-                <li onclick="loadChatMessages(@chatId)" class="d-flex justify-content-between list-group-item" style="cursor:pointer;border-bottom:1px solid #0F2537;">
+                <li onclick="loadChatMessages('@friend.Id')" class="d-flex justify-content-between list-group-item" style="cursor:pointer;border-bottom:1px solid #0F2537;">
                 <div class="d-flex align-items-center">
-                    <span style="border-radius:50%; background-color:gray; height:50px; width:50px;"></span>
+                        <span style="border-radius:50%; background-color:gray; height:50px; width:50px;"></span>
                     <span style="margin-left:20px;">@friend.UserName</span>
                     @{ /* <span class="text-muted">Email: @friend.Email</span>*/ }
                  </div>
@@ -47,21 +47,44 @@ else
 
 @section Scripts {
     <script>
-        function loadChatMessages(chatId) {
+        function loadChatMessages(friendId) {
             $.ajax({
-                url: '@Url.Action("GetChatMessages", "Home")',
+                url: '/Chats/GetOrCreateChat',
                 type: 'GET',
-                data: { chatId: chatId },
-                success: function (data) {
-                    $('#chatMessages').html(data);
-                    loadMessageForm(chatId); // Încarcă formularul de trimitere a mesajelor
-                    scrollToBottom(); // Derulează automat la încărcarea mesajelor
+                data: { friendId: friendId },
+                success: function (response) {
+                    if (response.success) {
+                        var chatId = response.chatId;
+                        if (chatId) {
+                            $.ajax({
+                                url: '@Url.Action("GetChatMessages", "Home")',
+                                type: 'GET',
+                                data: { chatId: chatId },
+                                success: function (data) {
+                                    $('#chatMessages').html(data);
+                                    loadMessageForm(chatId);
+                                    scrollToBottom();
+                                },
+                                error: function () {
+                                    alert('Failed to load chat messages.');
+                                }
+                            });
+                        } else {
+                            alert('Chat ID not provided in response.');
+                        }
+                    } else {
+                        alert(response.message);
+                    }
                 },
                 error: function () {
-                    alert('Failed to load chat messages.');
+                    alert('Failed to get or create chat.');
                 }
             });
         }
+
+
+
+
 
         function loadMessageForm(chatId) {
             $.ajax({
