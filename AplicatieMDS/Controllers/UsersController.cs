@@ -81,17 +81,20 @@ namespace AplicatieMDS.Controllers
             return View(user);
         }
 
-        public async Task<ActionResult> Edit(string id)
+        public async Task<IActionResult> Edit(string id)
         {
-            ApplicationUser user = await _userManager.FindByIdAsync(id);
-            user.AllRoles = GetAllRoles();
-            var roleNames = await _userManager.GetRolesAsync(user);
-            var currentUserRole = _roleManager.Roles
-                                              .Where(r => roleNames.Contains(r.Name))
-                                              .Select(r => r.Id)
-                                              .FirstOrDefault();
+            var user = await _userManager.FindByIdAsync(id);
+            if (user == null)
+            {
+                return NotFound();
+            }
 
-            ViewBag.UserRole = currentUserRole;
+            // Populate ViewBag.Roles with all available roles
+            ViewBag.Roles = _roleManager.Roles.Select(r => new SelectListItem
+            {
+                Text = r.Name,
+                Value = r.Id
+            });
 
             return View(user);
         }
@@ -100,54 +103,53 @@ namespace AplicatieMDS.Controllers
         public async Task<ActionResult> Edit(string id, ApplicationUser newData, [FromForm] string newRole)
         {
             ApplicationUser user = await _userManager.FindByIdAsync(id);
-            user.AllRoles = GetAllRoles();
-
-            if (ModelState.IsValid)
+            if (user == null)
             {
-                user.UserName = newData.UserName;
-                user.Email = newData.Email;
-                user.FirstName = newData.FirstName;
-                user.LastName = newData.LastName;
-                user.PhoneNumber = newData.PhoneNumber;
-
-                // Remove all existing roles
-                var currentRoles = await _userManager.GetRolesAsync(user);
-                foreach (var role in currentRoles)
-                {
-                    await _userManager.RemoveFromRoleAsync(user, role);
-                }
-
-                // Add the new role
-                var roleName = await _roleManager.FindByIdAsync(newRole);
-                if (roleName != null)
-                {
-                    await _userManager.AddToRoleAsync(user, roleName.Name);
-                }
-
-                var result = await _userManager.UpdateAsync(user);
-                if (result.Succeeded)
-                {
-                    return RedirectToAction("Index");
-                }
-                foreach (var error in result.Errors)
-                {
-                    ModelState.AddModelError(string.Empty, error.Description);
-                }
+                return NotFound();
             }
 
-            var roles = GetAllRoles();
-            ViewBag.Roles = new SelectList(roles, "Value", "Text");
-            var roleNames = await _userManager.GetRolesAsync(user);
-            var currentUserRole = _roleManager.Roles
-                                              .Where(r => roleNames.Contains(r.Name))
-                                              .Select(r => r.Id)
-                                              .FirstOrDefault();
+            // Update user data
+            user.UserName = newData.UserName;
+            user.Email = newData.Email;
+            user.FirstName = newData.FirstName;
+            user.LastName = newData.LastName;
+            user.PhoneNumber = newData.PhoneNumber;
 
-            ViewBag.UserRole = currentUserRole;
+            // Remove all existing roles
+            var currentRoles = await _userManager.GetRolesAsync(user);
+            foreach (var role in currentRoles)
+            {
+                await _userManager.RemoveFromRoleAsync(user, role);
+            }
+
+            // Add the new role
+            var roleName = await _roleManager.FindByIdAsync(newRole);
+            if (roleName != null)
+            {
+                await _userManager.AddToRoleAsync(user, roleName.Name);
+            }
+
+            var result = await _userManager.UpdateAsync(user);
+            if (result.Succeeded)
+            {
+                return RedirectToAction("Index");
+            }
+            foreach (var error in result.Errors)
+            {
+                ModelState.AddModelError(string.Empty, error.Description);
+            }
+
+            // If update fails, repopulate ViewBag.Roles and return to view
+            ViewBag.Roles = _roleManager.Roles.Select(r => new SelectListItem
+            {
+                Text = r.Name,
+                Value = r.Id
+            });
+
             return View(user);
         }
 
- 
+
 
 
 

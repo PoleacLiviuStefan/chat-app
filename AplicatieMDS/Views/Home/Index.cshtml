@@ -22,36 +22,34 @@
                 @foreach (var friendRelation in filteredFriends)
                 {
                     var friend = friendRelation.UserId == ViewBag.UserCurent ? friendRelation.Friend : friendRelation.User;
-                    var chatId = ((IEnumerable<AplicatieMDS.Models.Chat>)ViewBag.Chats).FirstOrDefault(c => (c.CurrentUserId == friend.Id && c.FriendUserId == ViewBag.UserCurent) || (c.FriendUserId == friend.Id && c.CurrentUserId == ViewBag.UserCurent))?.Id;
-                    var lastMessage = chatId.HasValue && ViewBag.LastMessages.ContainsKey(chatId.Value) ? ViewBag.LastMessages[chatId.Value] : null;
+                    var chat = ((IEnumerable<AplicatieMDS.Models.Chat>)ViewBag.Chats).FirstOrDefault(c => (c.CurrentUserId == friend.Id && c.FriendUserId == ViewBag.UserCurent) || (c.FriendUserId == friend.Id && c.CurrentUserId == ViewBag.UserCurent));
 
-                    <li onclick="loadChatMessages(@chatId)" class="d-flex justify-content-between list-group-item" style="cursor:pointer;border-bottom:1px solid #0F2537;">
-                        <div class="d-flex align-items-center w-100">
-                            <span class="d-flex justify-content-center align-items-center" style="border-radius:50%; background-color:white; height:50px; width:50px; overflow:hidden">
-                                <img src="~/Images/user.svg" alt="Avatar" width="50px" height="50px" />
-                            </span>
-                            <div class="d-flex justify-content-between w-100">
-                                <div style="margin-left:20px;" class="d-flex flex-column">
-                            <span >@friend.UserName</span>
-                                @if (lastMessage != null)
-                                {
-                                    <p >@(lastMessage.Content.Length > 20 ? lastMessage.Content.Substring(0, 20) + "..." : lastMessage.Content)</p>
+                    if (chat != null)
+                    {
+                        var lastMessage = chat.LastMessage?.Content;
+                        var lastMessageDate = chat.LastMessage?.Date;
+                        var displayMessage = lastMessage != null && lastMessage.Length > 20 ? lastMessage.Substring(0, 20) + "..." : lastMessage;
 
-                                }
-                                </div>
-                            <small class="text-muted">@lastMessage.Date.ToString("g")</small>
+                        <li onclick="loadChatMessages(@chat.Id)" class="d-flex justify-content-between list-group-item" style="cursor:pointer;border-bottom:1px solid #0F2537;">
+                            <div class="d-flex align-items-center">
+                                <span class="d-flex justify-content-center align-items-center" style="border-radius:50%; background-color:white; height:50px; width:50px; overflow:hidden">
+                                    <img src="~/Images/user.svg" alt="Avatar" width="50px" height="50px" />
+                                </span>
+                                <span style="margin-left:20px;">
+                                    <strong>@friend.UserName</strong><br />
+                                    @displayMessage - @lastMessageDate?.ToString("g")
+                                </span>
                             </div>
-                        </div>
-                        <div>
-                           
-                        </div>
-                    </li>
+                        </li>
+                    }
                 }
             </ul>
         }
         else
         {
-            <p>You have no friends added.</p>
+            <span class="d-flex justify-content-center w-100">
+            <p class="">You have no friends added.</p>
+            </span>
         }
     </div>
 
@@ -84,6 +82,7 @@
                 success: function (data) {
                     $('#chatMessages').html(data);
                     loadMessageForm(chatId); // Încarcă formularul de trimitere a mesajelor
+                    markMessagesAsSeen(chatId); // Marchez mesajele ca fiind văzute
                     scrollToBottom(); // Derulează automat la încărcarea mesajelor
                 },
                 error: function () {
@@ -118,6 +117,22 @@
                 }
             });
         }
+
+        function markMessagesAsSeen(chatId) {
+            $.ajax({
+                url: '@Url.Action("MarkMessagesAsSeen", "Home")',
+                type: 'POST',
+                data: { chatId: chatId },
+                success: function () {
+                    console.log('Messages marked as seen');
+                },
+                error: function (jqXHR, textStatus, errorThrown) {
+                    console.log(jqXHR.responseText);
+                    alert('Failed to mark messages as seen.');
+                }
+            });
+        }
+
 
         function sendMessage(form) {
             $.ajax({
@@ -191,3 +206,4 @@
         }
     </script>
 }
+

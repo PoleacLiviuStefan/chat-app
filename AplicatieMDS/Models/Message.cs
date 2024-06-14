@@ -8,9 +8,9 @@ namespace AplicatieMDS.Models
     {
         public enum MessageStatus
         {
-            Delivered,
-            Unseen,
-            Seen
+            Delivered = 0,
+            Unseen = 1,
+            Seen = 2
         }
 
         [Key]

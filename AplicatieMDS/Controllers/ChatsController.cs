@@ -149,6 +149,32 @@ namespace AplicatieMDS.Controllers
             return RedirectToAction("ShowAllFriends", "Users");
         }
 
+        [HttpPost]
+        [Authorize]
+        public async Task<IActionResult> MarkAsSeen(int chatId)
+        {
+            var userId = _userManager.GetUserId(User);
+            var chat = await db.Chats.Include(c => c.Messages)
+                                      .FirstOrDefaultAsync(c => c.Id == chatId && (c.CurrentUserId == userId || c.FriendUserId == userId));
+
+            if (chat == null)
+            {
+                return NotFound();
+            }
+
+            var unseenMessages = chat.Messages.Where(m => m.UserId != userId && m.Status == Message.MessageStatus.Unseen).ToList();
+            foreach (var message in unseenMessages)
+            {
+                message.Status = Message.MessageStatus.Seen;
+            }
+
+            await db.SaveChangesAsync();
+
+            return Ok();
+        }
+
+
+
         private void SetAccessRights()
         {
             ViewBag.EsteAdmin = User.IsInRole("Admin");

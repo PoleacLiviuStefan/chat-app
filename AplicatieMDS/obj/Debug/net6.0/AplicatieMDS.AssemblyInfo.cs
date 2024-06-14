@@ -16,7 +16,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("AplicatieMDS")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+52c0b2cde8a03902344bb8fab36c551f13ed35fb")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+ada1a148e92303ef3be59af6892fd31d155cd06d")]
 [assembly: System.Reflection.AssemblyProductAttribute("AplicatieMDS")]
 [assembly: System.Reflection.AssemblyTitleAttribute("AplicatieMDS")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

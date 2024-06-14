@@ -3,7 +3,7 @@
 <head>
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <title>@ViewData["Title"] - AplicatieMDS</title>
+    <title>@ViewData["Title"] - UNITALK</title>
     <link rel="stylesheet" href="~/css/mycsstheme.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/AplicatieMDS.styles.css" asp-append-version="true" />
@@ -16,7 +16,7 @@
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container-fluid">
-                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index">AplicatieMDS</a>
+                <a class="navbar-brand" asp-area="" asp-controller="Home" asp-action="Index"> <img src="~/Images/logo.png" alt="Avatar" width="253px" height="50px" /></a>
                 <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target=".navbar-collapse" aria-controls="navbarSupportedContent"
                         aria-expanded="false" aria-label="Toggle navigation">
                     <span class="navbar-toggler-icon"></span>
@@ -29,18 +29,23 @@
                                 <a class="nav-link text-dark" asp-area="" asp-controller="Users" asp-action="Index">Afisare utilizatori Admin</a>
                             </li>
                         }
+
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Users" asp-action="Index2">Afisare Utilizatori</a>
-                        </li>
+                        </li
+                        @{
+                            /*
                         <li class="nav-item">
                             <a class="nav-link text-dark" asp-area="" asp-controller="Chats" asp-action="Index">Afisare chat</a>
                         </li>
+                        */
+                        }
                         @if (User.Identity.IsAuthenticated)
                         {
                             <li class="nav-item">
                                 <form asp-controller="Users" asp-action="Index2" method="get">
                                     <input type="text" name="searchTerm" placeholder="Caută utilizatori...">
-                                    <button type="submit">Caută</button>
+                                    <button class="btn-primary" style="color:white;border:none;margin-top:8px;" type="submit">Caută</button>
                                 </form>
                             </li>
                         }
@@ -48,14 +53,18 @@
                     @if (User.Identity.IsAuthenticated)
                     {
                         <form method="post" action="/Users/ReceivedInvitations">
-                            <button type="submit" class="btn btn-primary">Invitations Received</button>
+                            <button type="submit" class="btn btn-primary" >Invitations Received</button>
                         </form>
                     }
-                    @if (User.Identity.IsAuthenticated)
-                    {
+                    @{
+                        /*
+                        @if (User.Identity.IsAuthenticated)
+                        {
                         <form method="post" action="/Users/ShowAllFriends">
-                            <button type="submit" class="btn btn-primary">Show Friends</button>
+                        <button type="submit" class="btn btn-primary">Show Friends</button>
                         </form>
+                        }
+                        */
                     }
                     <partial name="_LoginPartial" />
                 </div>
@@ -69,7 +78,7 @@
     </div>
     <footer class="border-top footer text-muted">
         <div class="container">
-            &copy; 2024 - AplicatieMDS
+            &copy; 2024 - UNITALK
         </div>
     </footer>
 

@@ -39,26 +39,46 @@ namespace AplicatieMDS.Controllers
                 .Select(uf => uf.UserId == userId ? uf.FriendId : uf.UserId)
                 .ToList();
 
-            // Load chats and last messages
+            // Load chats
             var chats = await db.Chats
-                .Include(c => c.Messages.OrderByDescending(m => m.Date).Take(1))
                 .Where(c => (friendIds.Contains(c.CurrentUserId) && c.FriendUserId == userId) ||
                             (friendIds.Contains(c.FriendUserId) && c.CurrentUserId == userId))
+                .Include(c => c.Messages.OrderByDescending(m => m.Date).Take(1))
                 .ToListAsync();
-
-            var lastMessages = chats.ToDictionary(
-                chat => chat.Id,
-                chat => chat.Messages.OrderByDescending(m => m.Date).FirstOrDefault()
-            );
 
             ViewBag.UserCurent = userId;
             ViewBag.Friends = friends;
             ViewBag.Chats = chats;
-            ViewBag.LastMessages = lastMessages;
 
             return View();
         }
 
+        [HttpPost]
+        [Authorize]
+        public async Task<IActionResult> MarkMessagesAsSeen(int chatId)
+        {
+            try
+            {
+                var userId = _userManager.GetUserId(User);
+                var messages = await db.Messages
+                    .Where(m => m.ChatId == chatId && m.UserId != userId && m.Status == Message.MessageStatus.Unseen)
+                    .ToListAsync();
+
+                foreach (var message in messages)
+                {
+                    message.Status = Message.MessageStatus.Seen;
+                }
+
+                await db.SaveChangesAsync();
+                return Ok();
+            }
+            catch (Exception ex)
+            {
+                // Log the exception
+                Console.WriteLine(ex.Message);
+                return StatusCode(500, "Internal server error");
+            }
+        }
 
         [HttpGet]
         [Authorize(Roles = "User,Moderator,Admin")]
