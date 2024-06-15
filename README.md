@@ -85,6 +85,10 @@ Raportare bug si rezolvare cu pull request: https://stefanpoleac.atlassian.net/b
 Comentarii cod: comentariile se afla in fisierele cu codul  
 Folosirea unui tool de AI: am folosit ChatGPT pe tot parcursul dezvoltarii proiectului. Un moment sugestiv ar fi urmatorul https://chatgpt.com/share/7bec9f94-5dd6-47f3-9f8b-80e480efecdf  
 
+
+DEMO:
+https://www.youtube.com/watch?v=m-ie-RJW5Jk&feature=youtu.be
+
   
 
 
